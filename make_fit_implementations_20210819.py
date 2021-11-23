@@ -260,7 +260,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	xplot = np.logspace(np.log10(np.nanmin(spec_e)), np.log10(np.nanmax(spec_e)), num=500)
 	xplot = xplot[np.where((xplot >= e_min) & (xplot <= e_max))[0]]
 	
-	fit_ind   = np.where((spec_e >= e_min) & (spec_e <= e_max))[0]
+	fit_ind   = np.where((spec_e >= e_min) & (spec_e <= e_max) & (np.isfinite(spec_flux) == True) & (np.isfinite(flux_err) == True))[0]
 	spec_e    = spec_e[fit_ind]
 	spec_flux = spec_flux[fit_ind]
 	e_err     = e_err[fit_ind]
@@ -284,7 +284,8 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	c1_final = 0
 	redchi_final = 0
 	
-	result_final = 0
+	result_final = None
+	
 	
 
 	if which_fit == 'best':
@@ -494,11 +495,13 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 							cut_final = cut_random
 							c1_final = c1_random
 
-	
+	print(which_fit)
 	if which_fit == 'broken':
 		# even if the which_fit is broken we need to check first if the break point is outside of the energy range. In that case we have to change it to single.
 		result_broken_guess = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, gamma2=g2_guess, c1 = c1_guess, alpha = alpha_guess, E_break = break_guess, maxit=10000)
+		print(result_broken_guess)
 		breakp = result_broken_guess.beta[4]
+		print(breakp)
 		if breakp < e_min or breakp > e_max:
 			print('The break point is outside of the energy range')
 			which_fit_final = 'single'
@@ -513,7 +516,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			cut_final = np.nan
 			c1_final = c1_guess
 		if breakp >= e_min and breakp <=e_max:
-			#print('here')
+			print('here')
 			which_fit_final = 'broken'
 			result_final = result_broken_guess
 			#print(result_final+'  519')
@@ -599,7 +602,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					c1_final = c1_random
 		
 
-		
+	#result =	result_final
 	if which_fit_final == 'single':
 		#result_single_pl = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1_final, c1=c1_final)
 		result_single_pl = result_final
@@ -725,7 +728,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			pickle.dump(result, f)
 
 	
-	print('The fitting variable c1 is ' ,c1)
+	# print('The fitting variable c1 is ' ,c1)
 	return result
 	
 	

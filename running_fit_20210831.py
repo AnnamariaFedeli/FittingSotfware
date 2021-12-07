@@ -7,7 +7,7 @@ import matplotlib.ticker as pltt
 from make_fit_implementations_20210819 import  MAKE_THE_FIT
 from make_fit_implementations_20210819 import closest_values
 from make_fit_implementations_20210819 import find_c1
-from combining_files_average_window import combine_data, low_sigma_threshold, delete_low_sigma, first_het_chan
+from combining_files import *
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 
 # <--------------------------------------------------------------- ALL NECESSARY INPUTS HERE ----------------------------------------------------------------->
@@ -17,8 +17,8 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/18-Nov-20-1420-10min-slope/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/18-Nov-20-1420-10min-slope/'# if savefig is true
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/18-Nov-20-1420-two-slopes/'
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/18-Nov-20-1420-two-slopes/'# if savefig is true
 
 
 date_string = '2020-11-18'
@@ -35,6 +35,8 @@ het_file_name = 'electron_data-'+date_string+'-het-l2-'+averaging+'_averaging.cs
 # You can choose to shift step data by a certain factor (I have used 0.8)
 
 sigma = 3
+rel_err = 0.5
+frac_nan_threshold = 0.9
 leave_out_1st_het_chan = True
 shift_step_data = False
 shift_factor = 0.8
@@ -42,10 +44,10 @@ shift_factor = 0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'ept' # fit_type options: step, ept, het, step_ept, step_ept_het  
+fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het  
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
-window_type = '10min slope D = 1.3 AU'
-slope = 'slope_13'
+window_type = 'two slopes D = 1.191 AU & 1.7 AU'
+slope = 'slope_11_17'
 
 #window_type = 'two slopes D = 1.1 AU & 1.6 AU'
 #slope = 'two_slopes_11_16'
@@ -70,7 +72,7 @@ g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
 alpha_guess = 7.16
-break_guess = 0.1#in MeV
+break_guess = 0.009#in MeV
 cut_guess = 0.12#in MeV
 
 # if use_random = False the fit will only be made once with the guess values
@@ -78,7 +80,7 @@ cut_guess = 0.12#in MeV
 # the fitting function will first create a list of reasonable values for each of the fitting parameters 
 # then randomly select values from the lists and compare the redchis of each fit to find the best one
 use_random = True 
-iterations = 15
+iterations = 20
 
 
 savefig = True # save the fit
@@ -113,22 +115,25 @@ het_data = pd.read_csv(path_to_file+het_file_name)
 if shift_step_data:
 	step_data['Bg_subtracted_'+fit_to] = shift_factor*step_data['Bg_subtracted_'+fit_to]
 
-data = combine_data([step_data, ept_data, het_data], path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+data = combine_data([step_data, ept_data, het_data], path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
 data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv')
 
-step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
 step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv')
-
 
 # saving the contaminated data so it can be plotted separately
 # then deleting it from the data so it doesn't overlap
-contaminated_data = low_sigma_threshold([step_data, ept_data, het_data], sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_sigma = low_sigma_threshold([step_data, ept_data, het_data], sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_nan   = too_many_nans([step_data, ept_data, het_data], frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_rel_err = high_rel_err([step_data, ept_data, het_data], rel_err = rel_err, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data = pd.concat([contaminated_data_sigma, contaminated_data_nan, contaminated_data_rel_err ])
+contaminated_data.reset_index(drop=True, inplace=True)
 #print(contaminated_data, 'contaminated_data')
 #deleting low sigma data so it doesn't overplot 
 first_het_data = first_het_chan(het_data)
-step_data = delete_low_sigma(step_data, sigma = sigma)
-ept_data = delete_low_sigma(ept_data, sigma = sigma)
-het_data = delete_low_sigma(het_data, sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold)
+ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold)
+het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
 
 #print(step_data, 'STEPPPP')
 #print(ept_data, 'EPTTTTTT')
@@ -193,14 +198,41 @@ flux_err_het    = het_data['Backsub_peak_uncertainty']
 
 energy_err_het = [energy_err_low_het, energy_err_high_het]
 
-# contaminated data
+# contaminated data 
 spec_energy_c = contaminated_data['Primary_energy']
 energy_err_low_c  = contaminated_data['Energy_error_low']
 energy_err_high_c = contaminated_data['Energy_error_high']
 spec_flux_c  = contaminated_data['Bg_subtracted_'+fit_to]
 flux_err_c   = contaminated_data['Backsub_peak_uncertainty']
 
+
+# contaminated data sigma
+spec_energy_c_sigma = contaminated_data_sigma['Primary_energy']
+energy_err_low_c_sigma  = contaminated_data_sigma['Energy_error_low']
+energy_err_high_c_sigma = contaminated_data_sigma['Energy_error_high']
+spec_flux_c_sigma  = contaminated_data_sigma['Bg_subtracted_'+fit_to]
+flux_err_c_sigma   = contaminated_data_sigma['Backsub_peak_uncertainty']
+
+# contaminated data nan
+spec_energy_c_nan = contaminated_data_nan['Primary_energy']
+energy_err_low_c_nan  = contaminated_data_nan['Energy_error_low']
+energy_err_high_c_nan = contaminated_data_nan['Energy_error_high']
+spec_flux_c_nan  = contaminated_data_nan['Bg_subtracted_'+fit_to]
+flux_err_c_nan   = contaminated_data_nan['Backsub_peak_uncertainty']
+
+# contaminated data rel err
+spec_energy_c_rel_err = contaminated_data_rel_err['Primary_energy']
+energy_err_low_c_rel_err  = contaminated_data_rel_err['Energy_error_low']
+energy_err_high_c_rel_err = contaminated_data_rel_err['Energy_error_high']
+spec_flux_c_rel_err  = contaminated_data_rel_err['Bg_subtracted_'+fit_to]
+flux_err_c_rel_err   = contaminated_data_rel_err['Backsub_peak_uncertainty']
+
 energy_err_c = [energy_err_low_c, energy_err_high_c]
+energy_err_c_sigma = [energy_err_low_c_sigma, energy_err_high_c_sigma]
+energy_err_c_nan = [energy_err_low_c_nan, energy_err_high_c_nan]
+energy_err_c_rel_err = [energy_err_low_c_rel_err, energy_err_high_c_rel_err]
+
+
 #print(spec_energy_step)
 if leave_out_1st_het_chan:
 	# first het
@@ -217,9 +249,10 @@ if leave_out_1st_het_chan:
 
 # <----------------------------------------------------------------------FIT AND PLOT------------------------------------------------------------------->
 
-f, ax = plt.subplots(1, figsize=(6, 4), dpi = 200)
+f, ax = plt.subplots(1, figsize=(8, 6), dpi = 200)
 
-distance = f'Solar Orbiter (R={dist} au)'
+distance  = ''
+#distance = f'Solar Orbiter (R={dist} au)'
 
 if make_fit:
 	if fit_type == 'step':
@@ -243,7 +276,12 @@ if make_fit:
 ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
 ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
 ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
-ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='gray', label='Sigma below '+str(sigma), zorder = -1)
+# for a more deailed version uncomment
+#ax.errorbar(spec_energy_c_sigma, spec_flux_c_sigma, yerr=flux_err_c_sigma, xerr = energy_err_c_sigma, marker='o', linestyle='', markersize= 3, color='blue', label='Sigma below '+str(sigma), zorder = -1)
+#ax.errorbar(spec_energy_c_nan, spec_flux_c_nan, yerr=flux_err_c_nan, xerr = energy_err_c_nan, marker='o', linestyle='', markersize= 3, color='gray', label='excluded (NaNs)', zorder = -1)
+#ax.errorbar(spec_energy_c_rel_err, spec_flux_c_rel_err, yerr=flux_err_c_rel_err, xerr = energy_err_c_rel_err, marker='o', linestyle='', markersize= 3, color='purple', label='excluded (rel err)', zorder = -1)
+ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='gray', label='excluded from fit', zorder = -1)
+
 if leave_out_1st_het_chan:
 	ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='black', label='Not included in the fit', zorder = -1)
 
@@ -251,7 +289,11 @@ if backsub:
 	ax.errorbar(spec_energy_step, step_data['Background_flux'], yerr=step_data['Bg_electron_uncertainty'], xerr = energy_err_step, marker='o', markersize= 3, linestyle='', color='darkorange', alpha=0.3)
 	ax.errorbar(spec_energy_ept, ept_data['Background_flux'], yerr=ept_data['Bg_electron_uncertainty'], xerr = energy_err_ept, marker='o', markersize= 3, linestyle='', color=color[direction], alpha=0.3)
 	ax.errorbar(spec_energy_het, het_data['Background_flux'], yerr=het_data['Bg_electron_uncertainty'], xerr = energy_err_het, marker='o', markersize= 3, linestyle='', color='maroon', alpha=0.3)
+	#ax.errorbar(spec_energy_c_sigma, contaminated_data_sigma['Background_flux'], yerr=contaminated_data_sigma['Bg_electron_uncertainty'], xerr = energy_err_c_sigma, marker='o', markersize= 3, linestyle='', color='blue', alpha=0.3)
+	#ax.errorbar(spec_energy_c_nan, contaminated_data_nan['Background_flux'], yerr=contaminated_data_nan['Bg_electron_uncertainty'], xerr = energy_err_c_nan, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
+	#ax.errorbar(spec_energy_c_rel_err, contaminated_data_rel_err['Background_flux'], yerr=contaminated_data_rel_err['Bg_electron_uncertainty'], xerr = energy_err_c_rel_err, marker='o', markersize= 3, linestyle='', color='purple', alpha=0.3)
 	ax.errorbar(spec_energy_c, contaminated_data['Background_flux'], yerr=contaminated_data['Bg_electron_uncertainty'], xerr = energy_err_c, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
+	
 	if leave_out_1st_het_chan:
 		ax.errorbar(spec_energy_first_het, first_het_data['Background_flux'], yerr=first_het_data['Bg_electron_uncertainty'], xerr = energy_err_first_het, marker='o', markersize= 3, linestyle='', color='black', alpha=0.3)
 	

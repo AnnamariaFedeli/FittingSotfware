@@ -728,7 +728,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			pickle.dump(result, f)
 
 	
-	# print('The fitting variable c1 is ' ,c1)
+	print('The fitting variable c1 is ' ,c1)
 	return result
 	
 	

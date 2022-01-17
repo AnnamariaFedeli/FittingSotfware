@@ -45,7 +45,7 @@ shift_factor = 0.8
 # !!! INPUTS FOR THE FIT !!!
 
 fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het  
-fit_to = 'peak'   # 'peak' or 'average'for window peak or average
+fit_to = 'average'   # 'peak' or 'average'for window peak or average
 window_type = 'two slopes D = 1.191 AU & 1.7 AU'
 slope = 'slope_11_17'
 
@@ -83,7 +83,7 @@ use_random = True
 iterations = 20
 
 
-savefig = True # save the fit
+savefig = False # save the fit
 save_pickle = False # save a pickle file of the odr run
 
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
@@ -92,6 +92,8 @@ save_pickle = False # save a pickle file of the odr run
 make_fit = True
 peak_spec = True
 backsub = True
+
+fit_to_comb = fit_to[0].upper()+fit_to[1:]
 
 direction = 'sun'
 intensity_label = 'Flux\n/(s cm² sr MeV)'
@@ -115,15 +117,15 @@ het_data = pd.read_csv(path_to_file+het_file_name)
 if shift_step_data:
 	step_data['Bg_subtracted_'+fit_to] = shift_factor*step_data['Bg_subtracted_'+fit_to]
 
-data = combine_data([step_data, ept_data, het_data], path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
+data = combine_data([step_data, ept_data, het_data], path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv')
 
-step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
+step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv')
 
 # saving the contaminated data so it can be plotted separately
 # then deleting it from the data so it doesn't overlap
-contaminated_data_sigma = low_sigma_threshold([step_data, ept_data, het_data], sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_sigma = low_sigma_threshold([step_data, ept_data, het_data], sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 contaminated_data_nan   = too_many_nans([step_data, ept_data, het_data], frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
 contaminated_data_rel_err = high_rel_err([step_data, ept_data, het_data], rel_err = rel_err, leave_out_1st_het_chan = leave_out_1st_het_chan)
 contaminated_data = pd.concat([contaminated_data_sigma, contaminated_data_nan, contaminated_data_rel_err ])
@@ -131,9 +133,9 @@ contaminated_data.reset_index(drop=True, inplace=True)
 #print(contaminated_data, 'contaminated_data')
 #deleting low sigma data so it doesn't overplot 
 first_het_data = first_het_chan(het_data)
-step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold)
-ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold)
-het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
+step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
+ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
+het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 
 #print(step_data, 'STEPPPP')
 #print(ept_data, 'EPTTTTTT')

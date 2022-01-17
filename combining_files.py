@@ -4,7 +4,7 @@ import pandas as pd
 
 
 
-def combine_data(data_name_list, path, sigma = 3, rel_err = 0.5, frac_nan_threshold = 0.9, leave_out_1st_het_chan = False):
+def combine_data(data_name_list, path, sigma = 3, rel_err = 0.5, frac_nan_threshold = 0.9, leave_out_1st_het_chan = False, fit_to = 'Peak'):
 	#print(data_name_list)
 	if leave_out_1st_het_chan and len(data_name_list)>2:
 		het = data_name_list[2]
@@ -17,7 +17,7 @@ def combine_data(data_name_list, path, sigma = 3, rel_err = 0.5, frac_nan_thresh
 	combined_csv.reset_index(drop=True, inplace=True)
 	combined_csv = combined_csv.drop(columns = 'Energy_channel')
 	
-	rows_to_delete = combined_csv.index[combined_csv['Peak_significance'] <sigma].tolist()
+	rows_to_delete = combined_csv.index[combined_csv[fit_to+'_significance'] <sigma].tolist()
 	combined_csv = combined_csv.drop(rows_to_delete, axis = 0)
 	combined_csv.reset_index(drop=True, inplace=True)
 	rows_to_delete = combined_csv.index[combined_csv['rel_backsub_peak_err']> rel_err].tolist()
@@ -31,7 +31,7 @@ def combine_data(data_name_list, path, sigma = 3, rel_err = 0.5, frac_nan_thresh
 	
 	return(combined_csv)
 
-def low_sigma_threshold(data_name_list, sigma = 3, leave_out_1st_het_chan = False):
+def low_sigma_threshold(data_name_list, sigma = 3, leave_out_1st_het_chan = False, fit_to = 'Peak'):
 	combined_csv = pd.concat(data_name_list)
 	combined_csv.reset_index(drop=True, inplace=True)
 	combined_csv = combined_csv.drop(columns = 'Energy_channel')
@@ -44,7 +44,7 @@ def low_sigma_threshold(data_name_list, sigma = 3, leave_out_1st_het_chan = Fals
 		data_name_list[2] = het 
 	
 
-	rows_to_delete = combined_csv.index[combined_csv['Peak_significance'] >sigma ].tolist()
+	rows_to_delete = combined_csv.index[combined_csv[fit_to+'_significance'] >sigma ].tolist()
 	combined_csv = combined_csv.drop(rows_to_delete, axis = 0)
 	combined_csv.reset_index(drop=True, inplace=True)
 	
@@ -88,9 +88,9 @@ def high_rel_err(data_name_list, rel_err = 0.5, leave_out_1st_het_chan = False):
 	
 	return(combined_csv)
 	
-def delete_bad_data(data, sigma = 3, rel_err = 0.5, frac_nan_threshold = 0.9, leave_out_1st_het_chan = False):
+def delete_bad_data(data, sigma = 3, rel_err = 0.5, frac_nan_threshold = 0.9, leave_out_1st_het_chan = False, fit_to = 'Peak'):
 	data = data.drop(columns = 'Energy_channel')
-	rows_to_delete = data.index[data['Peak_significance'] <sigma].tolist()
+	rows_to_delete = data.index[data[fit_to+'_significance'] <sigma].tolist()
 	data = data.drop(rows_to_delete, axis = 0)
 	data.reset_index(drop=True, inplace=True)
 	rows_to_delete = data.index[data['rel_backsub_peak_err']> rel_err].tolist()

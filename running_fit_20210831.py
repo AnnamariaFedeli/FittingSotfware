@@ -17,12 +17,16 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/18-Nov-20-1420-two-slopes/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/18-Nov-20-1420-two-slopes/'# if savefig is true
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/28-Oct-21-av/'
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/'# if savefig is true
 
 
-date_string = '2020-11-18'
+date_string = '2021-10-28'
 averaging = '5min'
+
+step = False
+ept  = True
+het  = True
 
 
 step_file_name = 'electron_data-'+date_string+'-step-l2-'+averaging+'_averaging.csv'
@@ -44,7 +48,7 @@ shift_factor = 0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het  
+fit_type = 'het' # fit_type options: step, ept, het, step_ept, step_ept_het  
 fit_to = 'average'   # 'peak' or 'average'for window peak or average
 window_type = 'two slopes D = 1.191 AU & 1.7 AU'
 slope = 'slope_11_17'
@@ -57,7 +61,7 @@ slope = 'slope_11_17'
 # 'best' will choose automatically the best fit type by comparing the redchis of the fits
 # 'cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
 
-which_fit = 'broken' 
+which_fit = 'best' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
@@ -66,8 +70,8 @@ which_fit = 'broken'
 # second het channel: 1.590048112
 # e_min and e_max can also be None. In this case the MAKE_THE_FIT function will automaically choose the values
 
-e_min =  0.004323343613# in MeV
-e_max =	1.590048112 # in MeV
+e_min =  0.6859485403# in MeV
+e_max =	10.62300287 # in MeV
 g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
@@ -110,38 +114,49 @@ dist = ''
 # <---------------------------------------------------------------LOADING AND SAVING FILES------------------------------------------------------------------->
 
 #print(path_to_file+step_file_name)
-step_data = pd.read_csv(path_to_file+step_file_name)
-ept_data = pd.read_csv(path_to_file+ept_file_name)
-het_data = pd.read_csv(path_to_file+het_file_name)
-#print(step_data)
-if shift_step_data:
-	step_data['Bg_subtracted_'+fit_to] = shift_factor*step_data['Bg_subtracted_'+fit_to]
+data_list = []
+if step :
+	step_data = pd.read_csv(path_to_file+step_file_name)
+	if shift_step_data:
+		step_data['Bg_subtracted_'+fit_to] = shift_factor*step_data['Bg_subtracted_'+fit_to]
+	data_list.append(step_data)
+if ept :
+	ept_data = pd.read_csv(path_to_file+ept_file_name)
+	data_list.append(ept_data)
+if het :
+	het_data = pd.read_csv(path_to_file+het_file_name)
+	data_list.append(het_data)
 
-data = combine_data([step_data, ept_data, het_data], path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
+
+
+data = combine_data(data_list, path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv')
 
-step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv')
+if step and ept:
+	step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
+	step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv')
+
+if ept and het:
+	ept_het_data = combine_data([ept_data, het_data], path_to_file+date_string+'-ept_het-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
+	ept_het_data = pd.read_csv(path_to_file+date_string+'-ept_het-l2-'+averaging+'.csv')
 
 # saving the contaminated data so it can be plotted separately
 # then deleting it from the data so it doesn't overlap
-contaminated_data_sigma = low_sigma_threshold([step_data, ept_data, het_data], sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-contaminated_data_nan   = too_many_nans([step_data, ept_data, het_data], frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
-contaminated_data_rel_err = high_rel_err([step_data, ept_data, het_data], rel_err = rel_err, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_sigma = low_sigma_threshold(data_list, sigma = sigma, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
+contaminated_data_nan   = too_many_nans(data_list, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan)
+contaminated_data_rel_err = high_rel_err(data_list, rel_err = rel_err, leave_out_1st_het_chan = leave_out_1st_het_chan)
 contaminated_data = pd.concat([contaminated_data_sigma, contaminated_data_nan, contaminated_data_rel_err ])
 contaminated_data.reset_index(drop=True, inplace=True)
-#print(contaminated_data, 'contaminated_data')
+
 #deleting low sigma data so it doesn't overplot 
 first_het_data = first_het_chan(het_data)
-step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
-ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
-het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
+if step:
+	step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
+if ept:
+ ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
+if het:
+	het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 
-#print(step_data, 'STEPPPP')
-#print(ept_data, 'EPTTTTTT')
-#print(het_data, 'HETTTTT')
-#print(first_het_data, 'first')
-#print(data)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------
 color = {'sun':'crimson','asun':'orange', 'north':'darkslateblue', 'south':'c'}
@@ -164,41 +179,53 @@ flux_err    = data['Backsub_peak_uncertainty']
 energy_err = [energy_err_low, energy_err_high]
 
 # step ept
-spec_energy_step_ept = step_ept_data['Primary_energy']
-energy_err_low_step_ept  = step_ept_data['Energy_error_low']
-energy_err_high_step_ept = step_ept_data['Energy_error_high']
-spec_flux_step_ept   = step_ept_data['Bg_subtracted_'+fit_to]
-flux_err_step_ept    = step_ept_data['Backsub_peak_uncertainty']
+if step and ept:
+	spec_energy_step_ept = step_ept_data['Primary_energy']
+	energy_err_low_step_ept  = step_ept_data['Energy_error_low']
+	energy_err_high_step_ept = step_ept_data['Energy_error_high']
+	spec_flux_step_ept   = step_ept_data['Bg_subtracted_'+fit_to]
+	flux_err_step_ept    = step_ept_data['Backsub_peak_uncertainty']
 
-energy_err_step_ept = [energy_err_low_step_ept, energy_err_high_step_ept]
+	energy_err_step_ept = [energy_err_low_step_ept, energy_err_high_step_ept]
 
+if ept and het:
+	spec_energy_ept_het = ept_het_data['Primary_energy']
+	energy_err_low_ept_het  = ept_het_data['Energy_error_low']
+	energy_err_high_ept_het = ept_het_data['Energy_error_high']
+	spec_flux_ept_het   = ept_het_data['Bg_subtracted_'+fit_to]
+	flux_err_ept_het    = ept_het_data['Backsub_peak_uncertainty']
+
+	energy_err_ept_het = [energy_err_low_ept_het, energy_err_high_ept_het]
 
 # step data
-spec_energy_step = step_data['Primary_energy']
-energy_err_low_step  = step_data['Energy_error_low']
-energy_err_high_step = step_data['Energy_error_high']
-spec_flux_step   = step_data['Bg_subtracted_'+fit_to]
-flux_err_step    = step_data['Backsub_peak_uncertainty']
+if step:
+	spec_energy_step = step_data['Primary_energy']
+	energy_err_low_step  = step_data['Energy_error_low']
+	energy_err_high_step = step_data['Energy_error_high']
+	spec_flux_step   = step_data['Bg_subtracted_'+fit_to]
+	flux_err_step    = step_data['Backsub_peak_uncertainty']
 
-energy_err_step = [energy_err_low_step, energy_err_high_step]
+	energy_err_step = [energy_err_low_step, energy_err_high_step]
 
 # ept data
-spec_energy_ept = ept_data ['Primary_energy']
-energy_err_low_ept   = ept_data ['Energy_error_low']
-energy_err_high_ept  = ept_data ['Energy_error_high']
-spec_flux_ept    = ept_data ['Bg_subtracted_'+fit_to]
-flux_err_ept     = ept_data ['Backsub_peak_uncertainty']
+if ept:
+	spec_energy_ept = ept_data ['Primary_energy']
+	energy_err_low_ept   = ept_data ['Energy_error_low']
+	energy_err_high_ept  = ept_data ['Energy_error_high']
+	spec_flux_ept    = ept_data ['Bg_subtracted_'+fit_to]
+	flux_err_ept     = ept_data ['Backsub_peak_uncertainty']
 
-energy_err_ept  = [energy_err_low_ept, energy_err_high_ept]
+	energy_err_ept  = [energy_err_low_ept, energy_err_high_ept]
 
 # het data
-spec_energy_het = het_data['Primary_energy']
-energy_err_low_het  = het_data['Energy_error_low']
-energy_err_high_het = het_data['Energy_error_high']
-spec_flux_het  = het_data['Bg_subtracted_'+fit_to]
-flux_err_het    = het_data['Backsub_peak_uncertainty']
+if het:
+	spec_energy_het = het_data['Primary_energy']
+	energy_err_low_het  = het_data['Energy_error_low']
+	energy_err_high_het = het_data['Energy_error_high']
+	spec_flux_het  = het_data['Bg_subtracted_'+fit_to]
+	flux_err_het    = het_data['Backsub_peak_uncertainty']
 
-energy_err_het = [energy_err_low_het, energy_err_high_het]
+	energy_err_het = [energy_err_low_het, energy_err_high_het]
 
 # contaminated data 
 spec_energy_c = contaminated_data['Primary_energy']
@@ -251,7 +278,7 @@ if leave_out_1st_het_chan:
 
 # <----------------------------------------------------------------------FIT AND PLOT------------------------------------------------------------------->
 
-f, ax = plt.subplots(1, figsize=(8, 6), dpi = 200)
+f, ax = plt.subplots(1, figsize=(6, 4), dpi = 200)
 
 distance  = ''
 #distance = f'Solar Orbiter (R={dist} au)'
@@ -265,19 +292,24 @@ if make_fit:
 		fit_result = MAKE_THE_FIT(spec_energy_ept, spec_flux_ept, energy_err_ept[1], flux_err_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
 	if fit_type == 'het':
 		plot_title = 'SolO '+ distance+' HET'
-		fit_result = MAKE_THE_FIT(spec_energy_het, spec_flux_het, energy_err_het[1], flux_err_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit='single', g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess,  c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_het, spec_flux_het, energy_err_het[1], flux_err_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit='single', g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess,  c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
 	if fit_type == 'step_ept':
 		plot_title = 'SolO '+ distance+' STEP and EPT'
 		fit_result = MAKE_THE_FIT(spec_energy_step_ept, spec_flux_step_ept, energy_err_step_ept[1], flux_err_step_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+	if fit_type == 'ept_het':
+		plot_title = 'SolO '+ distance+' EPT and HET'
+		fit_result = MAKE_THE_FIT(spec_energy_ept_het, spec_flux_ept_het, energy_err_ept_het[1], flux_err_ept_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
 	if fit_type == 'step_ept_het':
 		plot_title = 'SolO '+ distance+' STEP, EPT and HET'
 		fit_result = MAKE_THE_FIT(spec_energy, spec_flux, energy_err[1], flux_err, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
 	
 
-
-ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
-ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
-ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
+if step:
+	ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
+if ept:
+	ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
+if het:
+	ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
 # for a more deailed version uncomment
 #ax.errorbar(spec_energy_c_sigma, spec_flux_c_sigma, yerr=flux_err_c_sigma, xerr = energy_err_c_sigma, marker='o', linestyle='', markersize= 3, color='blue', label='Sigma below '+str(sigma), zorder = -1)
 #ax.errorbar(spec_energy_c_nan, spec_flux_c_nan, yerr=flux_err_c_nan, xerr = energy_err_c_nan, marker='o', linestyle='', markersize= 3, color='gray', label='excluded (NaNs)', zorder = -1)
@@ -288,9 +320,12 @@ if leave_out_1st_het_chan:
 	ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='black', label='Not included in the fit', zorder = -1)
 
 if backsub:
-	ax.errorbar(spec_energy_step, step_data['Background_flux'], yerr=step_data['Bg_electron_uncertainty'], xerr = energy_err_step, marker='o', markersize= 3, linestyle='', color='darkorange', alpha=0.3)
-	ax.errorbar(spec_energy_ept, ept_data['Background_flux'], yerr=ept_data['Bg_electron_uncertainty'], xerr = energy_err_ept, marker='o', markersize= 3, linestyle='', color=color[direction], alpha=0.3)
-	ax.errorbar(spec_energy_het, het_data['Background_flux'], yerr=het_data['Bg_electron_uncertainty'], xerr = energy_err_het, marker='o', markersize= 3, linestyle='', color='maroon', alpha=0.3)
+	if step:
+		ax.errorbar(spec_energy_step, step_data['Background_flux'], yerr=step_data['Bg_electron_uncertainty'], xerr = energy_err_step, marker='o', markersize= 3, linestyle='', color='darkorange', alpha=0.3)
+	if ept:
+		ax.errorbar(spec_energy_ept, ept_data['Background_flux'], yerr=ept_data['Bg_electron_uncertainty'], xerr = energy_err_ept, marker='o', markersize= 3, linestyle='', color=color[direction], alpha=0.3)
+	if het:
+		ax.errorbar(spec_energy_het, het_data['Background_flux'], yerr=het_data['Bg_electron_uncertainty'], xerr = energy_err_het, marker='o', markersize= 3, linestyle='', color='maroon', alpha=0.3)
 	#ax.errorbar(spec_energy_c_sigma, contaminated_data_sigma['Background_flux'], yerr=contaminated_data_sigma['Bg_electron_uncertainty'], xerr = energy_err_c_sigma, marker='o', markersize= 3, linestyle='', color='blue', alpha=0.3)
 	#ax.errorbar(spec_energy_c_nan, contaminated_data_nan['Background_flux'], yerr=contaminated_data_nan['Bg_electron_uncertainty'], xerr = energy_err_c_nan, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
 	#ax.errorbar(spec_energy_c_rel_err, contaminated_data_rel_err['Background_flux'], yerr=contaminated_data_rel_err['Bg_electron_uncertainty'], xerr = energy_err_c_rel_err, marker='o', markersize= 3, linestyle='', color='purple', alpha=0.3)

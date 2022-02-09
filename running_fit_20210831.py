@@ -17,14 +17,14 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/28-Oct-21-av/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/'# if savefig is true
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/7-May-21 2000/'
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/7-May-21 2000/'# if savefig is true
 
 
-date_string = '2021-10-28'
+date_string = '2021-05-07'
 averaging = '5min'
 
-step = False
+step = True
 ept  = True
 het  = True
 
@@ -48,35 +48,33 @@ shift_factor = 0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'het' # fit_type options: step, ept, het, step_ept, step_ept_het  
-fit_to = 'average'   # 'peak' or 'average'for window peak or average
-window_type = 'two slopes D = 1.191 AU & 1.7 AU'
-slope = 'slope_11_17'
+fit_type = 'ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_to = 'peak'   # 'peak' or 'average'for window peak or average
+window_type = 'One slope D = 0.7 AU' #'two slopes D = 1.191 AU & 1.7 AU'
+slope = 'slope_07'
 
-#window_type = 'two slopes D = 1.1 AU & 1.6 AU'
-#slope = 'two_slopes_11_16'
 # which_fit options: 
 # 'single' will force a single pl fit to the data
 # 'broken' will force a broken pl fit to the data but ONLY if the break point is within the energy range otherwise a sigle pl fit will be produced instead
 # 'best' will choose automatically the best fit type by comparing the redchis of the fits
 # 'cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
 
-which_fit = 'best' 
+which_fit = 'broken' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
 # ept energy range: 0.03295087252-0.452730295
-# het energy range: 0.6859485403-10.62300287
+# het energy range: 0.6859485403-10.62300288
 # second het channel: 1.590048112
 # e_min and e_max can also be None. In this case the MAKE_THE_FIT function will automaically choose the values
 
-e_min =  0.6859485403# in MeV
-e_max =	10.62300287 # in MeV
+e_min =  0.004323343613# in MeV
+e_max =	10.62300288# in MeV
 g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
 alpha_guess = 7.16
-break_guess = 0.009#in MeV
+break_guess = 0.1#in MeV
 cut_guess = 0.12#in MeV
 
 # if use_random = False the fit will only be made once with the guess values
@@ -87,13 +85,13 @@ use_random = True
 iterations = 20
 
 
-savefig = False # save the fit
+savefig = True # save the fit
 save_pickle = False # save a pickle file of the odr run
 
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
 
 
-make_fit = True
+make_fit = False
 peak_spec = True
 backsub = True
 
@@ -149,14 +147,15 @@ contaminated_data = pd.concat([contaminated_data_sigma, contaminated_data_nan, c
 contaminated_data.reset_index(drop=True, inplace=True)
 
 #deleting low sigma data so it doesn't overplot 
-first_het_data = first_het_chan(het_data)
+
 if step:
 	step_data = delete_bad_data(step_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
 if ept:
- ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
+	ept_data = delete_bad_data(ept_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, fit_to = fit_to_comb)
 if het:
+	first_het_data = first_het_chan(het_data)
 	het_data = delete_bad_data(het_data, sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-
+	
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------
 color = {'sun':'crimson','asun':'orange', 'north':'darkslateblue', 'south':'c'}
@@ -226,6 +225,7 @@ if het:
 	flux_err_het    = het_data['Backsub_peak_uncertainty']
 
 	energy_err_het = [energy_err_low_het, energy_err_high_het]
+	print(energy_err_het)
 
 # contaminated data 
 spec_energy_c = contaminated_data['Primary_energy']
@@ -263,7 +263,7 @@ energy_err_c_rel_err = [energy_err_low_c_rel_err, energy_err_high_c_rel_err]
 
 
 #print(spec_energy_step)
-if leave_out_1st_het_chan:
+if het and leave_out_1st_het_chan:
 	# first het
 	spec_energy_first_het = first_het_data['Primary_energy']
 	energy_err_low_first_het  = first_het_data['Energy_error_low']
@@ -274,15 +274,14 @@ if leave_out_1st_het_chan:
 	energy_err_first_het = [energy_err_low_first_het, energy_err_high_first_het]
 
 
-
-
 # <----------------------------------------------------------------------FIT AND PLOT------------------------------------------------------------------->
 
-f, ax = plt.subplots(1, figsize=(6, 4), dpi = 200)
+f, ax = plt.subplots(1, figsize=(8, 6), dpi = 200)
 
 distance  = ''
 #distance = f'Solar Orbiter (R={dist} au)'
-
+#ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='blue', label='First HET channel', zorder = -1)
+	
 if make_fit:
 	if fit_type == 'step':
 		plot_title = 'SolO '+ distance+' STEP'
@@ -302,22 +301,49 @@ if make_fit:
 	if fit_type == 'step_ept_het':
 		plot_title = 'SolO '+ distance+' STEP, EPT and HET'
 		fit_result = MAKE_THE_FIT(spec_energy, spec_flux, energy_err[1], flux_err, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+	if step:
+		ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', linestyle='',markersize= 3 ,  color='darkorange', label='STEP', zorder = -1)
+	if ept:
+		ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
+	if het:
+		ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
+		if leave_out_1st_het_chan:
+			ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='black', label='First HET channel', zorder = -1)
+	ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='gray', label='excluded from fit', zorder = -1)
 	
 
-if step:
-	ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
-if ept:
-	ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
-if het:
-	ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
+if make_fit is False:
+	ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='maroon', zorder = -1)
+	if step:
+		ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
+		if ept and het:
+			plot_title = 'SolO STEP, EPT and HET'
+		if ept and het is False:
+			plot_title = 'SolO STEP and EPT'
+		if het and ept is False:
+			plot_title = 'SolO STEP and HET'
+		if ept is False and het is False:
+			plot_title = 'SolO STEP'
+	if ept:
+		ax.errorbar(spec_energy_ept, spec_flux_ept, yerr=flux_err_ept, xerr = energy_err_ept, marker='o', linestyle='', markersize= 3, color=color[direction], label='EPT '+direction, zorder = -1)
+		if het and step is False:
+			plot_title = 'SolO EPT and HET'
+		if step is False and het is False:
+			plot_title = 'SolO EPT'
+	if het:
+		ax.errorbar(spec_energy_het, spec_flux_het, yerr=flux_err_het, xerr = energy_err_het, marker='o', linestyle='', markersize= 3, color='maroon', label='HET '+direction, zorder = -1)
+		if ept is False and step is False:
+			plot_title = 'SolO HET'
+		if leave_out_1st_het_chan:
+			ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='black', label='First HET channel', zorder = -1)
+			
+
+	
 # for a more deailed version uncomment
 #ax.errorbar(spec_energy_c_sigma, spec_flux_c_sigma, yerr=flux_err_c_sigma, xerr = energy_err_c_sigma, marker='o', linestyle='', markersize= 3, color='blue', label='Sigma below '+str(sigma), zorder = -1)
 #ax.errorbar(spec_energy_c_nan, spec_flux_c_nan, yerr=flux_err_c_nan, xerr = energy_err_c_nan, marker='o', linestyle='', markersize= 3, color='gray', label='excluded (NaNs)', zorder = -1)
 #ax.errorbar(spec_energy_c_rel_err, spec_flux_c_rel_err, yerr=flux_err_c_rel_err, xerr = energy_err_c_rel_err, marker='o', linestyle='', markersize= 3, color='purple', label='excluded (rel err)', zorder = -1)
-ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='gray', label='excluded from fit', zorder = -1)
 
-if leave_out_1st_het_chan:
-	ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='black', label='Not included in the fit', zorder = -1)
 
 if backsub:
 	if step:
@@ -329,26 +355,30 @@ if backsub:
 	#ax.errorbar(spec_energy_c_sigma, contaminated_data_sigma['Background_flux'], yerr=contaminated_data_sigma['Bg_electron_uncertainty'], xerr = energy_err_c_sigma, marker='o', markersize= 3, linestyle='', color='blue', alpha=0.3)
 	#ax.errorbar(spec_energy_c_nan, contaminated_data_nan['Background_flux'], yerr=contaminated_data_nan['Bg_electron_uncertainty'], xerr = energy_err_c_nan, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
 	#ax.errorbar(spec_energy_c_rel_err, contaminated_data_rel_err['Background_flux'], yerr=contaminated_data_rel_err['Bg_electron_uncertainty'], xerr = energy_err_c_rel_err, marker='o', markersize= 3, linestyle='', color='purple', alpha=0.3)
-	ax.errorbar(spec_energy_c, contaminated_data['Background_flux'], yerr=contaminated_data['Bg_electron_uncertainty'], xerr = energy_err_c, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
+	if make_fit:
+		ax.errorbar(spec_energy_c, contaminated_data['Background_flux'], yerr=contaminated_data['Bg_electron_uncertainty'], xerr = energy_err_c, marker='o', markersize= 3, linestyle='', color='gray', alpha=0.3)
+		if het and leave_out_1st_het_chan:
+			ax.errorbar(spec_energy_first_het, first_het_data['Background_flux'], yerr=first_het_data['Bg_electron_uncertainty'], xerr = energy_err_first_het, marker='o', markersize= 3, linestyle='', color='black', alpha=0.3)
 	
-	if leave_out_1st_het_chan:
-		ax.errorbar(spec_energy_first_het, first_het_data['Background_flux'], yerr=first_het_data['Bg_electron_uncertainty'], xerr = energy_err_first_het, marker='o', markersize= 3, linestyle='', color='black', alpha=0.3)
+	if make_fit is False:
+		ax.errorbar(spec_energy_c, contaminated_data['Background_flux'], yerr=contaminated_data['Bg_electron_uncertainty'], xerr = energy_err_c, marker='o', markersize= 3, linestyle='', color='maroon', alpha=0.3)
 	
 	
 
 ax.set_xscale('log')
 ax.set_yscale('log')
 locmin = pltt.LogLocator(base=10.0,subs=(0.2,0.4,0.6,0.8),numticks=12)
+ax.set_xlim(e_min-(e_min/2), e_max+(e_max/2))
 ax.yaxis.set_minor_locator(locmin)
 ax.yaxis.set_minor_formatter(pltt.NullFormatter())
 
 
-if legend_title == 'Electrons':
-	ax.set_xlim(2e-3, 20)
-if legend_title == 'foil':
-	ax.set_xlim(2e-3, 20)
-if legend_title == 'mag':
-    ax.set_xlim(4e1, 7.4e3)
+#if legend_title == 'Electrons':
+#	ax.set_xlim(2e-3, 20)
+#if legend_title == 'foil':
+#	ax.set_xlim(2e-3, 20)
+#if legend_title == 'mag':
+#    ax.set_xlim(4e1, 7.4e3)
 
 
 plt.legend(title='"'+legend_title+'"',  prop={'size': 7})
@@ -357,6 +387,25 @@ plt.xlabel(energy_label)
 plt.title(plot_title+'  '+peak_info+'\n'+date_str+'  '+averaging+'  averaging')
 
 if savefig:
-	plt.savefig(path_to_savefig+date_string+'-'+averaging+'-'+fit_type+'-'+slope, dpi=300)
+	if make_fit:
+		plt.savefig(path_to_savefig+date_string+'-'+averaging+'-'+fit_type+'-'+slope+'-'+fit_to, dpi=300)
+	if make_fit is False:
+		if step and ept and het:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-step_ept_het', dpi=300)
+		if step and ept and het is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-step_ept', dpi=300)
+		if step and het and ept is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-step_het', dpi=300)
+		if step and ept is False and het is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-step', dpi=300)
+		if ept and het and step is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-ept_het', dpi=300)
+		if ept and step is False and het is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-ept', dpi=300)
+		if het and ept is False and step is False:
+			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-het', dpi=300)
+		
+		
+
 
 plt.show()

@@ -111,39 +111,55 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	which_fit = 'single'
 	redchi = 0
 	
-		
+	print('here')
 	# cut break check	
 	if redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single:
+		#print('here 117')
 		if cut < e_min or cut > e_max:
+			#print('here 119')
 			if breakp_cut < e_min or breakp_cut > e_max:
+				#print('here 121')
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
-			if breakp >= e_min and breakp <=e_max:	
+			if breakp >= e_min and breakp <=e_max:
+				#print('here 126')			
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
+			else:
+				#print('666')
+				which_fit = 'single'
+				redchi = redchi_single
+				result = result_single_pl
 		if cut >= e_min and cut<= e_max:
+			#print('here 131')
 			if breakp_cut < e_min or breakp_cut > e_max:
+				#print('here 133')
 			# should this be broken? because if there is a break it might be break and not cut...
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
 			if breakp_cut >= e_min and breakp_cut <= e_max:
+				#print('here 139')
 				which_fit = 'cut'
 				redchi = redchi_cut_break
 				result = result_cut_break
 	
 	if redchi_broken<=redchi_single and redchi_broken <=redchi_cut_break:
+		#print('here 145')
 		if breakp < e_min or breakp > e_max:
+			#print('here 147')
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
-		if breakp >= e_min and breakp <=e_max:	
+		if breakp >= e_min and breakp <=e_max:
+			#print('152')
 			which_fit = 'broken'
 			redchi = redchi_broken
 			result = result_broken
 	if redchi_broken>redchi_single and redchi_cut_break>redchi_single:
+		#print('here 157')
 		which_fit = 'single'
 		redchi = redchi_single
 		result = result_single_pl
@@ -495,7 +511,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 							cut_final = cut_random
 							c1_final = c1_random
 
-	print(which_fit)
+	#print(which_fit)
 	if which_fit == 'broken':
 		# even if the which_fit is broken we need to check first if the break point is outside of the energy range. In that case we have to change it to single.
 		result_broken_guess = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, gamma2=g2_guess, c1 = c1_guess, alpha = alpha_guess, E_break = break_guess, maxit=10000)

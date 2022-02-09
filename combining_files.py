@@ -109,10 +109,8 @@ def delete_bad_data(data, sigma = 3, rel_err = 0.5, frac_nan_threshold = 0.9, le
 	
 
 def first_het_chan(data):
-	
 	first_het = data.index[data['Primary_energy']> 0.7].tolist()
 	data = data.drop(first_het, axis = 0)
 	data.reset_index(drop=True, inplace=True)
-	
 	return(data)
 	

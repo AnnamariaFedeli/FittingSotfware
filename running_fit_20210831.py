@@ -48,7 +48,7 @@ shift_factor = 0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
 window_type = 'One slope D = 0.7 AU' #'two slopes D = 1.191 AU & 1.7 AU'
 slope = 'slope_07'
@@ -56,10 +56,12 @@ slope = 'slope_07'
 # which_fit options: 
 # 'single' will force a single pl fit to the data
 # 'broken' will force a broken pl fit to the data but ONLY if the break point is within the energy range otherwise a sigle pl fit will be produced instead
+# 'best_sb' will choose automatically the best fit type between single and broken by comparing the redchis of the fits
 # 'best' will choose automatically the best fit type by comparing the redchis of the fits
 # 'cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
 
-which_fit = 'broken' 
+
+which_fit = 'cut' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
@@ -69,7 +71,7 @@ which_fit = 'broken'
 # e_min and e_max can also be None. In this case the MAKE_THE_FIT function will automaically choose the values
 
 e_min =  0.004323343613# in MeV
-e_max =	10.62300288# in MeV
+e_max =	0.452730295# in MeV
 g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
@@ -85,13 +87,13 @@ use_random = True
 iterations = 20
 
 
-savefig = True # save the fit
+savefig = False # save the fit
 save_pickle = False # save a pickle file of the odr run
 
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
 
 
-make_fit = False
+make_fit = True
 peak_spec = True
 backsub = True
 
@@ -225,7 +227,7 @@ if het:
 	flux_err_het    = het_data['Backsub_peak_uncertainty']
 
 	energy_err_het = [energy_err_low_het, energy_err_high_het]
-	print(energy_err_het)
+	
 
 # contaminated data 
 spec_energy_c = contaminated_data['Primary_energy']
@@ -262,7 +264,7 @@ energy_err_c_nan = [energy_err_low_c_nan, energy_err_high_c_nan]
 energy_err_c_rel_err = [energy_err_low_c_rel_err, energy_err_high_c_rel_err]
 
 
-#print(spec_energy_step)
+
 if het and leave_out_1st_het_chan:
 	# first het
 	spec_energy_first_het = first_het_data['Primary_energy']
@@ -313,7 +315,7 @@ if make_fit:
 	
 
 if make_fit is False:
-	ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='maroon', zorder = -1)
+	ax.errorbar(spec_energy_c, spec_flux_c, yerr=flux_err_c, xerr = energy_err_c, marker='o', linestyle='', markersize= 3, color='gray', label = 'cont. data', zorder = -1)
 	if step:
 		ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', markersize= 3 , linestyle='', color='darkorange', label='STEP', zorder = -1)
 		if ept and het:

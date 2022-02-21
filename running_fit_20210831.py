@@ -17,15 +17,15 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/7-May-21 2000/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/7-May-21 2000/'# if savefig is true
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/9-Oct-21/'
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/9-Oct-21/'# if savefig is true
 
 
-date_string = '2021-05-07'
+date_string = '2021-10-09'
 averaging = '5min'
 
-step = True
-ept  = True
+step = False
+ept  = False
 het  = True
 
 
@@ -41,14 +41,14 @@ het_file_name = 'electron_data-'+date_string+'-het-l2-'+averaging+'_averaging.cs
 sigma = 3
 rel_err = 0.5
 frac_nan_threshold = 0.9
-leave_out_1st_het_chan = True
+leave_out_1st_het_chan = False
 shift_step_data = False
 shift_factor = 0.8
 
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'het' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
 window_type = 'One slope D = 0.7 AU' #'two slopes D = 1.191 AU & 1.7 AU'
 slope = 'slope_07'
@@ -61,7 +61,7 @@ slope = 'slope_07'
 # 'cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
 
 
-which_fit = 'cut' 
+which_fit = 'best_sb' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
@@ -70,8 +70,8 @@ which_fit = 'cut'
 # second het channel: 1.590048112
 # e_min and e_max can also be None. In this case the MAKE_THE_FIT function will automaically choose the values
 
-e_min =  0.004323343613# in MeV
-e_max =	0.452730295# in MeV
+e_min =  None# in MeV
+e_max =	None # in MeV
 g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
@@ -283,7 +283,8 @@ f, ax = plt.subplots(1, figsize=(8, 6), dpi = 200)
 distance  = ''
 #distance = f'Solar Orbiter (R={dist} au)'
 #ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='blue', label='First HET channel', zorder = -1)
-	
+
+
 if make_fit:
 	if fit_type == 'step':
 		plot_title = 'SolO '+ distance+' STEP'
@@ -365,22 +366,36 @@ if backsub:
 	if make_fit is False:
 		ax.errorbar(spec_energy_c, contaminated_data['Background_flux'], yerr=contaminated_data['Bg_electron_uncertainty'], xerr = energy_err_c, marker='o', markersize= 3, linestyle='', color='maroon', alpha=0.3)
 	
-	
+e_range_min = None
+e_range_max = None	
+step_energy_range = [0.004323343613,0.07803193193]
+ept_energy_range =  [0.03295087252,0.452730295]
+het_energy_range =  [0.6859485403,10.62300288]
+if fit_type == 'step':
+	e_range_min = step_energy_range[0]
+	e_range_max = step_energy_range[1]
+if fit_type == 'step_ept':
+	e_range_min = step_energy_range[0]
+	e_range_max = ept_energy_range[1]
+if fit_type == 'step_ept_het':
+	e_range_min = step_energy_range[0]
+	e_range_max = het_energy_range[1]
+if fit_type == 'ept':
+	e_range_min = ept_energy_range[0]
+	e_range_max = ept_energy_range[1]
+if fit_type == 'ept_het':
+	e_range_min = ept_energy_range[0]
+	e_range_max = het_energy_range[1]
+if fit_type =='het':
+	e_range_min = het_energy_range[0]
+	e_range_max = het_energy_range[1]
 
 ax.set_xscale('log')
 ax.set_yscale('log')
 locmin = pltt.LogLocator(base=10.0,subs=(0.2,0.4,0.6,0.8),numticks=12)
-ax.set_xlim(e_min-(e_min/2), e_max+(e_max/2))
+ax.set_xlim(e_range_min-(e_range_min/2), e_range_max+(e_range_max/2))
 ax.yaxis.set_minor_locator(locmin)
 ax.yaxis.set_minor_formatter(pltt.NullFormatter())
-
-
-#if legend_title == 'Electrons':
-#	ax.set_xlim(2e-3, 20)
-#if legend_title == 'foil':
-#	ax.set_xlim(2e-3, 20)
-#if legend_title == 'mag':
-#    ax.set_xlim(4e1, 7.4e3)
 
 
 plt.legend(title='"'+legend_title+'"',  prop={'size': 7})

@@ -206,10 +206,10 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		
 	if e_min is None:
 		#e_min = min(spec_e)
-		e_min = spec_e[2]
+		e_min = spec_e[0]
 	if e_max is None:
 		#e_max = max(spec_e)
-		e_max = spec_e[len(spec_e)-5]
+		e_max = spec_e[len(spec_e)-1]
 	
 	if c1_guess is None:
 		absolute_val_array = np.abs(spec_e - 1)

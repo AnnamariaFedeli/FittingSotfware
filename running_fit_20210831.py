@@ -3,7 +3,7 @@ import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib.ticker as pltt
-#from sunpy.coordinates import get_horizons_coord
+from sunpy.coordinates import get_horizons_coord
 from make_fit_implementations_20210819 import  MAKE_THE_FIT
 from make_fit_implementations_20210819 import closest_values
 from make_fit_implementations_20210819 import find_c1
@@ -107,9 +107,9 @@ legend_title = 'Electrons'  # 'mag' or 'foil' or 'Electrons' if there is more th
 data_product = 'l2'
 
 date_str = date_string[8:]+'-'+date_string[5:7]+'-'+date_string[0:4] #DO NOT CHANGE. This is used later for the plot title etc.
-#pos = get_horizons_coord('Solar Orbiter', startdate, 'id')
-#dist = np.round(pos.radius.value, 2)
-dist = ''
+pos = get_horizons_coord('Solar Orbiter', date_string, 'id')
+dist = np.round(pos.radius.value, 2)
+#dist = ''
 
 # <---------------------------------------------------------------LOADING AND SAVING FILES------------------------------------------------------------------->
 
@@ -280,8 +280,8 @@ if het and leave_out_1st_het_chan:
 
 f, ax = plt.subplots(1, figsize=(8, 6), dpi = 200)
 
-distance  = ''
-#distance = f'Solar Orbiter (R={dist} au)'
+#distance  = ''
+distance = f' (R={dist} au)'
 #ax.errorbar(spec_energy_first_het, spec_flux_first_het, yerr=flux_err_first_het, xerr = energy_err_first_het, marker='o', linestyle='', markersize= 3, color='blue', label='First HET channel', zorder = -1)
 
 

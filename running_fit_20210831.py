@@ -43,8 +43,7 @@ rel_err = 0.5
 frac_nan_threshold = 0.9
 leave_out_1st_het_chan = False
 shift_step_data = False
-shift_factor = 0.8
-
+shift_factor = None #0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
@@ -89,7 +88,7 @@ iterations = 20
 
 savefig = False # save the fit
 save_pickle = False # save a pickle file of the odr run
-
+save_fit_variables = False # save the variables from the fit
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
 
 
@@ -167,6 +166,21 @@ prim_e = data['Primary_energy']
 pickle_path = None
 if save_pickle:
 	pickle_path = path_to_file+date_string+'-pickle_'+fit_type+'-l2-'+averaging+'.p'
+
+fit_var_path = None
+if save_fit_variables:
+	fit_var_path = path_to_file+date_string+'-fit-variables_'+fit_type+'-l2-'+averaging+'.csv'
+
+
+df = pd.DataFrame({"Date": date_string, "Averaging":averaging, "Direction":direction,
+"Data type":data_product, "Distance":dist, "STEP":step, "EPT":ept, "HET":het, 
+"Sigma":sigma, "Relative error":rel_err, "Fraction of nan":frac_nan_threshold,
+"Leave first HET channel out":leave_out_1st_het_chan, "Shift STEP data": shift_factor,
+"Type of fit":fit_type, "Fit to":fit_to, "Window":window_type, "Which fit":which_fit , 
+"Min energy": e_min, "Max energy": e_max, "Gamma1 guess":g1_guess, "Gamma2 guess":g2_guess,
+"c1 guess": c1_guess, "Alpha guess": alpha_guess, "Break guess":break_guess, "Cutoff point guess":cut_guess,
+"Use random":use_random, "Iterations":iterations}, index = [0])
+
 
 # <---------------------------------------------------------------------DATA--------------------------------------------------------------------->
 
@@ -288,22 +302,22 @@ distance = f' (R={dist} au)'
 if make_fit:
 	if fit_type == 'step':
 		plot_title = 'SolO '+ distance+' STEP'
-		fit_result = MAKE_THE_FIT(spec_energy_step, spec_flux_step, energy_err_step[1], flux_err_step, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_step, spec_flux_step, energy_err_step[1], flux_err_step, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if fit_type == 'ept':
 		plot_title = 'SolO '+ distance+' EPT'
-		fit_result = MAKE_THE_FIT(spec_energy_ept, spec_flux_ept, energy_err_ept[1], flux_err_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_ept, spec_flux_ept, energy_err_ept[1], flux_err_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if fit_type == 'het':
 		plot_title = 'SolO '+ distance+' HET'
-		fit_result = MAKE_THE_FIT(spec_energy_het, spec_flux_het, energy_err_het[1], flux_err_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit='single', g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess,  c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_het, spec_flux_het, energy_err_het[1], flux_err_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit='single', g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess,  c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if fit_type == 'step_ept':
 		plot_title = 'SolO '+ distance+' STEP and EPT'
-		fit_result = MAKE_THE_FIT(spec_energy_step_ept, spec_flux_step_ept, energy_err_step_ept[1], flux_err_step_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_step_ept, spec_flux_step_ept, energy_err_step_ept[1], flux_err_step_ept, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if fit_type == 'ept_het':
 		plot_title = 'SolO '+ distance+' EPT and HET'
-		fit_result = MAKE_THE_FIT(spec_energy_ept_het, spec_flux_ept_het, energy_err_ept_het[1], flux_err_ept_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy_ept_het, spec_flux_ept_het, energy_err_ept_het[1], flux_err_ept_het, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if fit_type == 'step_ept_het':
 		plot_title = 'SolO '+ distance+' STEP, EPT and HET'
-		fit_result = MAKE_THE_FIT(spec_energy, spec_flux, energy_err[1], flux_err, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path)
+		fit_result = MAKE_THE_FIT(spec_energy, spec_flux, energy_err[1], flux_err, ax, direction=direction, e_min = e_min, e_max = e_max, which_fit=which_fit, g1_guess=g1_guess, g2_guess=g2_guess, alpha_guess=alpha_guess, break_guess=break_guess, cut_guess = cut_guess, c1_guess=c1_guess,use_random = use_random, iterations = iterations, path = pickle_path, path2 = fit_var_path)
 	if step:
 		ax.errorbar(spec_energy_step, spec_flux_step, yerr=flux_err_step, xerr = energy_err_step, marker='o', linestyle='',markersize= 3 ,  color='darkorange', label='STEP', zorder = -1)
 	if ept:

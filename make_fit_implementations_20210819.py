@@ -7,6 +7,7 @@ from scipy.stats import t as studentt
 import pickle
 #from scipy.odr import *
 
+
 def make_step_electron_flux(stepdata, mask_conta=False):
 	'''
 	here we use the calibration factors from Paco (Alcala) to calculate the electron flux out of the (integral - magnet) fluxes
@@ -193,7 +194,7 @@ def find_c1(spec_e, spec_flux, e_min, e_max):
 	
 	
 
-def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_fit='best', e_min=None, e_max=None, g1_guess=-2., g2_guess=None, alpha_guess=5., break_guess=0.065, cut_guess = 0.12, c1_guess=None, use_random = False, iterations = 10, path = None):
+def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_fit='best', e_min=None, e_max=None, g1_guess=-2., g2_guess=None, alpha_guess=5., break_guess=0.065, cut_guess = 0.12, c1_guess=None, use_random = False, iterations = 10, path = None, path2 = None):
 	'''This function fit the data to a single, double or break+cut power law. 
 	The fit type can be chosen between: single,double, cut or best. 
 	The best option checks between all the options and chooses between the three by checking the reduced chisqr.
@@ -670,7 +671,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					c1_final = c1_random
 		
 	
-	
+	result_dataframe = pd.DataFrame({"FInal fit type":which_fit_final}, index = [0])
 	result = result_final
 	if which_fit_final == 'single':
 		#result_single_pl = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1_final, c1=c1_final)
@@ -686,7 +687,13 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		gamma1_err  = errors[1]
 		ax.plot(xplot, pl_fit.simple_pl([c1, gamma1], xplot), '-', color=color[direction], label=r'$\mathregular{\delta=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err))
 		ax.plot(xplot, pl_fit.simple_pl([c1, gamma1], xplot), '--k', zorder=10)
-		
+
+		result_dataframe["Reduced chi sq"] = redchi_single
+		result_dataframe["c1"] = c1
+		result_dataframe["c1 err"] = errors[0]
+		result_dataframe["Gamma1"] = gamma1
+		result_dataframe["Gamma1 err"] = gamma1_err
+
 	if which_fit_final == 'broken':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
 		result_broken = result_final
@@ -726,6 +733,17 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(gamma2, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma2_err)+'\n'+r'$\mathregular{\alpha=}$%5.2f' %round(alpha, ndigits=2))#, lw=lwd)
 		ax.axvline(x=breakp, color='blue', linestyle='--', label=r'$\mathregular{E_b=}$ '+str(round(breakp*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(breakp_err*1e3, ndigits=0))+' keV')
 		
+		result_dataframe["Reduced chi sq"] = redchi_broken
+		result_dataframe["c1"] = c1
+		result_dataframe["c1 err"] = errors[0]
+		result_dataframe["Gamma1"] = gamma1
+		result_dataframe["Gamma1 err"] = gamma1_err
+		result_dataframe["Gamma2"] = gamma2
+		result_dataframe["Gamma2 err"] = gamma2_err
+		result_dataframe["Break point [MeV]"] = breakp
+		result_dataframe["Break point err [MeV]"] = breakp_err
+		result_dataframe["Alpha"] = alpha
+
 	if which_fit_final == 'cut':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
 		result_cut = result_final
@@ -734,7 +752,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		breakp        = result_cut.beta[4]
 		alpha         = result_cut.beta[3]
 		dof           = len(spec_e) - len(result_cut.beta)
-		redchi_double = result_cut.res_var
+		redchi_cut = result_cut.res_var
 		t_val      = studentt.interval(0.95, dof)[1]
 		errors     = t_val * result_cut.sd_beta  #np.sqrt(np.diag(result_cut.cov_beta))
 		breakp_err = errors[4]
@@ -767,7 +785,19 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(gamma2, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma2_err)+'\n'+r'$\mathregular{\alpha=}$%5.2f' %round(alpha, ndigits=2))#, lw=lwd)
 		ax.axvline(x=breakp, color='blue', linestyle='--', label=r'$\mathregular{E_b=}$ '+str(round(breakp*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(breakp_err*1e3, ndigits=0))+' keV')
 		ax.axvline(x=cut, color='purple', linestyle='--', label=r'$\mathregular{E_c=}$ '+str(round(cut*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(cut_err*1e3, ndigits=0))+' keV')
-	
+
+		result_dataframe["Reduced chi sq"] = redchi_cut
+		result_dataframe["c1"] = c1
+		result_dataframe["c1 err"] = errors[0]
+		result_dataframe["Gamma1"] = gamma1
+		result_dataframe["Gamma1 err"] = gamma1_err
+		result_dataframe["Gamma2"] = gamma2
+		result_dataframe["Gamma2 err"] = gamma2_err
+		result_dataframe["Break point [MeV]"] = breakp
+		result_dataframe["Break point err [MeV]"] = breakp_err
+		result_dataframe["Exponential cutoff point [MeV]"] = cut
+		result_dataframe["Cutoff err [MeV]"] = cut_err
+		result_dataframe["Alpha"] = alpha
 	
 	#print(result.beta, 'beta')
 	#print(result.sd_beta, 'sd_beta')
@@ -787,11 +817,15 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	#print(result.info, 'info')
 	#print(result.stopreason, 'stopreason')
 	
-	# save result to pickle file
+	# save result to pickle file 
 	if path != None:
 		#pfname =  '.p'
 		with open(path, 'wb') as f:
 			pickle.dump(result, f)
+
+	# save the fitting variables
+	if path2 != None:
+		result_dataframe.to_csv(path2, sep = ";")
 
 	print('The fitting variable c1 is ' ,c1)
 	return result

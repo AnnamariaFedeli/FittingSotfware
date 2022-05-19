@@ -9,6 +9,13 @@ from make_fit_implementations_20210819 import closest_values
 from make_fit_implementations_20210819 import find_c1
 from combining_files import *
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+# Import mymodule
+import importlib.machinery
+import importlib.util
+loader = importlib.machinery.SourceFileLoader( 'savecsv', r'C:\Users\Omistaja\Documents\GitHub\SavingCsv\savecsv.py' )
+spec = importlib.util.spec_from_loader( 'savecsv', loader )
+mymodule = importlib.util.module_from_spec( spec )
+loader.exec_module( mymodule )
 
 # <--------------------------------------------------------------- ALL NECESSARY INPUTS HERE ----------------------------------------------------------------->
 
@@ -17,11 +24,10 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/csv/9-Oct-21/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/fits/9-Oct-21/'# if savefig is true
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/20201118-1314/5min/sun/'
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/20201118-1314/5min/sun/'# if savefig is true
 
-
-date_string = '2021-10-09'
+date_string = '2020-11-18'
 averaging = '5min'
 
 step = False
@@ -47,9 +53,9 @@ shift_factor = None #0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'het' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'step_ept_het' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
-window_type = 'One slope D = 0.7 AU' #'two slopes D = 1.191 AU & 1.7 AU'
+window_type = 'One slope D = 1 AU' #'two slopes D = 1.191 AU & 1.7 AU'
 slope = 'slope_07'
 
 # which_fit options: 
@@ -89,6 +95,7 @@ iterations = 20
 savefig = False # save the fit
 save_pickle = False # save a pickle file of the odr run
 save_fit_variables = False # save the variables from the fit
+save_fitrun = False # save all variables used for the fit
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
 
 
@@ -165,21 +172,20 @@ prim_e = data['Primary_energy']
 
 pickle_path = None
 if save_pickle:
-	pickle_path = path_to_file+date_string+'-pickle_'+fit_type+'-l2-'+averaging+'.p'
+	pickle_path = path_to_file+date_string+'-pickle_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.p'
 
 fit_var_path = None
 if save_fit_variables:
-	fit_var_path = path_to_file+date_string+'-fit-variables_'+fit_type+'-l2-'+averaging+'.csv'
+	fit_var_path = path_to_file+date_string+'-fit-result-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.csv'
 
-
-df = pd.DataFrame({"Date": date_string, "Averaging":averaging, "Direction":direction,
-"Data type":data_product, "Distance":dist, "STEP":step, "EPT":ept, "HET":het, 
-"Sigma":sigma, "Relative error":rel_err, "Fraction of nan":frac_nan_threshold,
-"Leave first HET channel out":leave_out_1st_het_chan, "Shift STEP data": shift_factor,
-"Type of fit":fit_type, "Fit to":fit_to, "Window":window_type, "Which fit":which_fit , 
-"Min energy": e_min, "Max energy": e_max, "Gamma1 guess":g1_guess, "Gamma2 guess":g2_guess,
-"c1 guess": c1_guess, "Alpha guess": alpha_guess, "Break guess":break_guess, "Cutoff point guess":cut_guess,
-"Use random":use_random, "Iterations":iterations}, index = [0])
+fitrun_path = None
+if save_fitrun:
+	fitrun_path = path_to_file+date_string+'-all-fit-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.csv'
+	
+	mymodule.save_info_fit(fitrun_path, date_string, averaging, direction, data_product, dist, step, ept, het,
+	sigma, rel_err, frac_nan_threshold, leave_out_1st_het_chan, shift_factor, fit_type, fit_to,
+	window_type, which_fit, e_min, e_max, g1_guess, g2_guess, c1_guess, alpha_guess, break_guess,
+	use_random, iterations)
 
 
 # <---------------------------------------------------------------------DATA--------------------------------------------------------------------->

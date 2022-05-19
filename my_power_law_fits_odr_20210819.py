@@ -73,6 +73,34 @@ def cut_break_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, c1=None, alpha=Non
 
 	return result
 	
+def cut_pl_func(p, x): #c1, gamma1, gamma2, alpha, E_break, E_cut
+
+	c1, gamma1, E_cut = p
+	
+	y = c1*(x/0.1)**gamma1 *np.exp(-(x/E_cut)**2)
+	
+	return y
+
+	
+def cut_pl_fit(x,y, xerr, yerr, gamma1=-1.8, c1=None, E_cut = 0.35, print_report=False, maxit=20):
+	c1 = y[4] if c1==None else c1
+	#c2 = y[-1]*1e-2 if c2==None else c2
+	#alpha = 0.1 if alpha==None else alpha
+	#covMatrix = np.cov(xerr,bias=False)
+
+	plmodel = Model(cut_pl_func)
+	# Create a RealData object using our initiated data from above.
+	data = RealData(x, y, sx=xerr, sy=yerr)
+	# Set up ODR with the model and data.
+	odr = ODR(data, plmodel, beta0=[c1, gamma1, E_cut], ifixb=[1,1,1], maxit = maxit)
+
+	# Run the regression.
+	result = odr.run()
+
+	if print_report:
+		result.pprint()
+
+	return result
 
 def broken_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, c1=None, alpha=None, E_break=0.1, print_report=False, maxit=20):
 	#covMatrix = np.cov(xerr,bias=False)

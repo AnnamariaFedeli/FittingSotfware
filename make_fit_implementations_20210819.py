@@ -87,7 +87,7 @@ def closest_values(array, value):
 	return(closest_values_array)
 	
 	
-def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, E_break,  E_cut= 0.1, fit = 'best',  maxit=10000, e_min=None, e_max=None):
+def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, E_break,  E_cut= None, fit = 'best',  maxit=10000, e_min=None, e_max=None):
 	#the function also checks if the break point is outside of the energy array (also the cutoff point)
 	#the min and max energies cannot be last and/or first points because it wouldn't be a physical result
 	if e_min is None:
@@ -104,7 +104,7 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	redchi_broken = result_broken.res_var
 	breakp        = result_broken.beta[4]	
 
-	if E_break != None:
+	if E_cut != None:
 		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
 		redchi_cut= result_broken.res_var
 		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
@@ -525,7 +525,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	if which_fit == 'best_sb':
 	#first check the redchi and if the break is outside of the energy range using the guess values then compare the random values to these 
 	#if redchi is better, substitute values
-		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = cut_guess, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
+		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = None, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
 		redchi_guess = which_fit_guess[1]
 		redchi_final = redchi_guess
 		which_fit_final = which_fit_guess[0]
@@ -557,7 +557,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				alpha_random = np.random.choice(alpha_array, 1)[0]
 				break_random = np.random.choice(break_array,1)[0]
 				c1_random = np.random.choice(c1_array,1)[0]
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = 0.1, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = None, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]

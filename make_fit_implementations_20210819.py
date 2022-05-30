@@ -557,7 +557,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				alpha_random = np.random.choice(alpha_array, 1)[0]
 				break_random = np.random.choice(break_array,1)[0]
 				c1_random = np.random.choice(c1_array,1)[0]
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = None, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = 0.1, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]

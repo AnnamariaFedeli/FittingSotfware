@@ -92,6 +92,8 @@ def cut_pl_fit(x,y, xerr, yerr, gamma1=-1.8, c1=None, E_cut = 0.35, print_report
 	# Create a RealData object using our initiated data from above.
 	data = RealData(x, y, sx=xerr, sy=yerr)
 	# Set up ODR with the model and data.
+	print(x)
+	print(E_cut)
 	odr = ODR(data, plmodel, beta0=[c1, gamma1, E_cut], ifixb=[1,1,1], maxit = maxit)
 
 	# Run the regression.

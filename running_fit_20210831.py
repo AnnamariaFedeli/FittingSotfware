@@ -30,10 +30,11 @@ path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_lo
 date_string = '2020-11-18'
 averaging = '5min'
 
-step = False
-ept  = False
+step = True
+ept  = True
 het  = True
 
+separator = ';'
 
 step_file_name = 'electron_data-'+date_string+'-step-l2-'+averaging+'_averaging.csv'
 ept_file_name = 'electron_data-'+date_string+'-ept-l2-'+averaging+'_averaging-ion_corr.csv'
@@ -125,29 +126,28 @@ dist = np.round(pos.radius.value, 2)
 #print(path_to_file+step_file_name)
 data_list = []
 if step :
-	step_data = pd.read_csv(path_to_file+step_file_name)
+	step_data = pd.read_csv(path_to_file+step_file_name, sep = separator)
 	if shift_step_data:
 		step_data['Bg_subtracted_'+fit_to] = shift_factor*step_data['Bg_subtracted_'+fit_to]
 	data_list.append(step_data)
+	
 if ept :
-	ept_data = pd.read_csv(path_to_file+ept_file_name)
+	ept_data = pd.read_csv(path_to_file+ept_file_name, sep = separator)
 	data_list.append(ept_data)
 if het :
-	het_data = pd.read_csv(path_to_file+het_file_name)
+	het_data = pd.read_csv(path_to_file+het_file_name, sep = separator)
 	data_list.append(het_data)
 
-
-print(data_list)
 data = combine_data(data_list, path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv')
+data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv', sep = separator)
 
 if step and ept:
 	step_ept_data = combine_data([step_data, ept_data], path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-	step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv')
+	step_ept_data = pd.read_csv(path_to_file+date_string+'-step_ept-l2-'+averaging+'.csv', sep = separator)
 
 if ept and het:
 	ept_het_data = combine_data([ept_data, het_data], path_to_file+date_string+'-ept_het-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
-	ept_het_data = pd.read_csv(path_to_file+date_string+'-ept_het-l2-'+averaging+'.csv')
+	ept_het_data = pd.read_csv(path_to_file+date_string+'-ept_het-l2-'+averaging+'.csv', sep = separator)
 
 # saving the contaminated data so it can be plotted separately
 # then deleting it from the data so it doesn't overlap

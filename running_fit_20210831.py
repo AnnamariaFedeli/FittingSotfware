@@ -63,7 +63,10 @@ slope = 'slope_07'
 # 'broken' will force a broken pl fit to the data but ONLY if the break point is within the energy range otherwise a sigle pl fit will be produced instead
 # 'best_sb' will choose automatically the best fit type between single and broken by comparing the redchis of the fits
 # 'best' will choose automatically the best fit type by comparing the redchis of the fits
-# 'cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
+# 'cut' will produce a single pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
+# 'broken_cut' will produce a broken pl fit with an exponential cutoff point. If the cutoff point is outside of the energy range a broken or single pl will be fit instead
+# maybe option to just check between broken and cut 
+# 'best_cb' 
 
 
 which_fit = 'best_sb' 
@@ -134,7 +137,7 @@ if het :
 	data_list.append(het_data)
 
 
-
+print(data_list)
 data = combine_data(data_list, path_to_file+date_string+'-all-l2-'+averaging+'.csv', sigma = sigma, rel_err = rel_err, frac_nan_threshold = frac_nan_threshold, leave_out_1st_het_chan = leave_out_1st_het_chan, fit_to = fit_to_comb)
 data = pd.read_csv(path_to_file+date_string+'-all-l2-'+averaging+'.csv')
 

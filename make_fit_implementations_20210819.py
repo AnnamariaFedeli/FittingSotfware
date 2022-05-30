@@ -439,6 +439,88 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 						cut_final = cut_random
 						c1_final = c1_random
 						
+
+
+
+
+
+	if which_fit == 'best_cb':
+	#first check the redchi and if the break is outside of the energy range using the guess values then compare the random values to these 
+	#if redchi is better, substitute values
+		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = cut_guess, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
+		redchi_guess = which_fit_guess[1]
+		redchi_final = redchi_guess
+		which_fit_final = which_fit_guess[0]
+		result_final = which_fit_guess[2]
+		if which_fit_guess[0] == 'single': 
+			gamma1_final = g1_guess
+			gamma2_final = np.nan
+			alpha_final = np.nan
+			break_final = np.nan
+			cut_final = np.nan
+			c1_final = c1_guess
+		if which_fit_guess[0] == 'broken': 
+			gamma1_final = g1_guess
+			gamma2_final = g2_guess
+			alpha_final = alpha_guess
+			break_final = break_guess
+			cut_final = np.nan
+			c1_final = c1_guess
+		if which_fit_guess[0] == 'cut':
+			gamma1_final = g1_guess
+			gamma2_final = np.nan
+			alpha_final = np.nan
+			break_final = np.nan
+			cut_final = cut_guess
+			c1_final = c1_guess
+		
+		if use_random :
+			for i in range(iterations):
+				#need [0] because it's an array
+				g1_random = np.random.choice(gamma1_array, 1)[0]
+				g2_random = np.random.choice(gamma2_array, 1)[0] 
+				#gamma2 should always be more negative (smaller) than gamma1
+				if g1_random<g2_random:
+					gamma = g1_random
+					g1_random = g2_random
+					g2_random = gamma
+				alpha_random = np.random.choice(alpha_array, 1)[0]
+				break_random = np.random.choice(break_array,1)[0]
+				cut_random = np.random.choice(cut_array,1)[0]
+				c1_random = np.random.choice(c1_array,1)[0]
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = cut_random, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
+				redchi_random = which_fit_random[1]
+				if redchi_random < redchi_final:
+					result_final = which_fit_random[2]
+					if which_fit_random[0] == 'single':		
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = np.nan
+						alpha_final = np.nan
+						break_final = np.nan
+						cut_final = np.nan
+						c1_final = c1_random
+					if which_fit_random[0] == 'broken':		
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = g2_random
+						alpha_final = alpha_random
+						break_final = break_random
+						cut_final = np.nan
+						c1_final = c1_random
+					if which_fit_random[0] == 'cut':
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = np.nan
+						alpha_final = np.nan
+						break_final = np.nan
+						cut_final = cut_random
+						c1_final = c1_random	
+					
+
 	if which_fit == 'best_sb':
 	#first check the redchi and if the break is outside of the energy range using the guess values then compare the random values to these 
 	#if redchi is better, substitute values

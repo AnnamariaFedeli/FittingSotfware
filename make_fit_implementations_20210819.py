@@ -118,13 +118,15 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		result_cut_break = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1, gamma2=gamma2, c1=c1, alpha=alpha, E_break=E_break, E_cut = E_cut, print_report=False, maxit=10000)
 		redchi_cut_break = result_cut_break.res_var
 		breakp_cut = result_cut_break.beta[4]
-		cut = result_cut_break.beta[5]
+		#The cut of te break + cutoff
+		cut_b = result_cut_break.beta[5]
 		if redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single and redchi_cut_break< redchi_cut:
-			if cut < e_min or cut > e_max:
+			if cut_b < e_min or cut_b > e_max:
 				if breakp_cut < e_min or breakp_cut > e_max:
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
+				# Need to compare break and cut to see which actually fits better
 				if breakp >= e_min and breakp <=e_max:
 					if redchi_broken<=redchi_cut:
 						which_fit = 'broken'
@@ -138,7 +140,7 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
-			if cut >= e_min and cut<= e_max:
+			if cut_b >= e_min and cut_b<= e_max:
 				if breakp_cut < e_min or breakp_cut > e_max:
 			# should this be broken? because if there is a break it might be break and not cut...
 					if redchi_single<redchi_broken and redchi_single<redchi_cut:
@@ -186,6 +188,27 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
+
+	if fit == 'best_cb':
+		if redchi_broken<=redchi_cut:
+			if breakp < e_min or breakp > e_max:
+				which_fit = 'single'
+				redchi = redchi_single
+				result = result_single_pl
+			if breakp >= e_min and breakp <=e_max:	
+				which_fit = 'broken'
+				redchi = redchi_broken
+				result = result_broken
+		if redchi_broken>redchi_cut:
+			if cut < e_min or cut > e_max:
+				which_fit = 'single'
+				redchi = redchi_single
+				result = result_single_pl
+			if cut >= e_min and cut <=e_max:	
+				which_fit = 'cut'
+				redchi = redchi_cut
+				result = result_cut
+			
 		
 	return([which_fit, redchi, result])
 	
@@ -478,49 +501,70 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	if which_fit == 'broken_cut':
 		result_cut_guess = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, gamma2=g2_guess, c1=c1_guess, alpha=alpha_guess, E_break=break_guess, E_cut = cut_guess, print_report=False, maxit=10000)
 		breakp_cut = result_cut_guess.beta[4]
-		cut = result_cut_guess.beta[5]
+		cut_b = result_cut_guess.beta[5]
 	
 		if breakp_cut < e_min or breakp_cut > e_max:
 			print('The break point is outside of the energy range')
-			which_fit_final = 'single'
-			result_single_pl_guess = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, c1=c1_guess)
-			result_final = result_single_pl_guess
-			redchi_guess  = result_single_pl_guess.res_var  
+			which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = None, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
+			redchi_guess = which_fit_guess[1]
 			redchi_final = redchi_guess
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
+			which_fit_final = which_fit_guess[0]
+			result_final = which_fit_guess[2]
+			if which_fit_guess[0] == 'single': 
+				gamma1_final = g1_guess
+				gamma2_final = np.nan
+				alpha_final = np.nan
+				break_final = np.nan
+				cut_final = np.nan
+				c1_final = c1_guess
+			if which_fit_guess[0] == 'broken': 
+				gamma1_final = g1_guess
+				gamma2_final = g2_guess
+				alpha_final = alpha_guess
+				break_final = break_guess
+				cut_final = np.nan
+				c1_final = c1_guess
+			if which_fit_guess[0] == 'cut': 
+				gamma1_final = g1_guess
+				gamma2_final = g2_guess
+				alpha_final = alpha_guess
+				break_final = break_guess
+				cut_final = cut_guess
+				c1_final = c1_guess
+
+
+
 		if breakp_cut >= e_min and breakp_cut <=e_max:
-			if cut <=e_min or cut >=e_max:
-				result_broken_guess = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = g1_guess, gamma2 = g2_guess, c1 = c1_guess, alpha = alpha_guess, E_break = break_guess, maxit=10000)
-				breakp = result_broken_guess.beta[4]
-				if breakp <e_min or breakp>e_max:
-					which_fit_final = 'single'
-					result_single_pl_guess = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, c1=c1_guess)
-					result_final = result_single_pl_guess
-					redchi_guess  = result_single_pl_guess.res_var  
-					redchi_final = redchi_guess
+			if cut_b <=e_min or cut_b >=e_max:
+				# The breaks are checked by redchi
+				which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = None, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
+				redchi_guess = which_fit_guess[1]
+				redchi_final = redchi_guess
+				which_fit_final = which_fit_guess[0]
+				result_final = which_fit_guess[2]
+				if which_fit_guess[0] == 'single': 
 					gamma1_final = g1_guess
 					gamma2_final = np.nan
 					alpha_final = np.nan
 					break_final = np.nan
 					cut_final = np.nan
 					c1_final = c1_guess
-					# here should compare the broken and single pl+ cut redchis
-				if breakp>=e_min and breakp<=e_max:
-					which_fit_final = 'broken'
-					redchi_guess  = result_broken_guess.res_var
-					redchi_final = redchi_guess
+				if which_fit_guess[0] == 'broken': 
 					gamma1_final = g1_guess
 					gamma2_final = g2_guess
 					alpha_final = alpha_guess
 					break_final = break_guess
 					cut_final = np.nan
 					c1_final = c1_guess
-			if cut>e_min and cut< e_max:
+				if which_fit_guess[0] == 'cut': 
+					gamma1_final = g1_guess
+					gamma2_final = g2_guess
+					alpha_final = alpha_guess
+					break_final = break_guess
+					cut_final = cut_guess
+					c1_final = c1_guess
+
+			if cut_b>e_min and cut_b< e_max:
 				which_fit_final = 'broken_cut'
 				result_final = result_cut_guess
 				redchi_guess  = result_cut_guess.res_var
@@ -545,65 +589,49 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				break_random = np.random.choice(break_array,1)[0]
 				cut_random = np.random.choice(cut_array, 1)[0]
 				c1_random = np.random.choice(c1_array, 1)[0]
-				result_cut_random = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_random, gamma2=g2_random, c1=c1_random, alpha=alpha_random, E_break=break_random, E_cut = cut_random, print_report=False, maxit=10000)
-				breakp_cut = result_cut_random.beta[4]
-				cut = result_cut_random.beta[5]
-				if breakp_cut < e_min or breakp_cut > e_max:
-					result_single_pl_random = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_random, c1=c1_random)
-					redchi_random  = result_single_pl_random.res_var  
-					if redchi_random < redchi_final:
-						which_fit_final = 'single'
+
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = cut_random, fit = 'broken_cut', maxit=10000, e_min = e_min, e_max = e_max)
+				redchi_random = which_fit_random[1]
+				if redchi_random < redchi_final:
+					result_final = which_fit_random[2]
+					if which_fit_random[0] == 'single':		
 						redchi_final = redchi_random
-						result_final = result_single_pl_random
+						which_fit_final = which_fit_random[0]
 						gamma1_final = g1_random
 						gamma2_final = np.nan
 						alpha_final = np.nan
 						break_final = np.nan
 						cut_final = np.nan
 						c1_final = c1_random
-						
-				if breakp_cut >= e_min and breakp_cut <=e_max:
-					if cut <= e_min or cut>= e_max:
-						result_broken_random = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = g1_random, gamma2 = g2_random, c1 = c1_random, alpha = alpha_random, E_break = break_random, maxit=10000)
-						breakp = result_broken_random.beta[4]
-						if breakp<e_min or breakp>e_max:
-							result_single_pl_random = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_random, c1=c1_random)
-							redchi_random  = result_single_pl_random.res_var  
-							if redchi_random < redchi_final:
-								which_fit_final = 'single'
-								redchi_final = redchi_random
-								result_final = result_single_pl_random
-								gamma1_final = g1_random
-								gamma2_final = np.nan
-								alpha_final = np.nan
-								break_final = np.nan
-								cut_final = np.nan
-								c1_final = c1_random
-						if breakp>=e_min and breakp<=e_max:
-							redchi_random = result_broken_random.res_var
-							if redchi_random < redchi_final:
-								which_fit_final = 'broken'
-								redchi_final = redchi_random
-								result_final =result_broken_random
-								gamma1_final = g1_random
-								gamma2_final = g2_random
-								alpha_final = alpha_random
-								break_final = break_random
-								cut_final = np.nan
-								c1_final = c1_random
-								
-					if cut>e_min and cut<e_max:
-						redchi_random = result_cut_random.res_var
-						if redchi_random<redchi_final:
-							which_fit_final = 'cut'
-							redchii_final = redchi_random
-							result_final = result_cut_random
-							gamma1_final = g1_random
-							gamma2_final = g2_random
-							alpha_final = alpha_random
-							break_final = break_random
-							cut_final = cut_random
-							c1_final = c1_random
+					if which_fit_random[0] == 'broken':		
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = g2_random
+						alpha_final = alpha_random
+						break_final = break_random
+						cut_final = np.nan
+						c1_final = c1_random
+					if which_fit_random[0] == 'cut':
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = np.nan
+						alpha_final = np.nan
+						break_final = np.nan
+						cut_final = cut_random
+						c1_final = c1_random	
+					if which_fit_random[0] == 'broken_cut':
+						redchi_final = redchi_random
+						which_fit_final = which_fit_random[0]
+						gamma1_final = g1_random
+						gamma2_final = g2_random
+						alpha_final = alpha_random
+						break_final = break_random
+						cut_final = cut_random
+						c1_final = c1_random
+
+
 
 	
 	if which_fit == 'broken':
@@ -780,7 +808,36 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		result_dataframe["Break point err [MeV]"] = breakp_err
 		result_dataframe["Alpha"] = alpha
 
+
 	if which_fit_final == 'cut':
+		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
+		result_cut = result_final
+		result        = result_final
+		cut        = result_cut.beta[2]
+			#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
+		dof           = len(spec_e) - len(result_broken.beta)
+		redchi_broken = result_cut.res_var
+		t_val      = studentt.interval(0.95, dof)[1]
+		errors     = t_val * result_broken.sd_beta  #np.sqrt(np.diag(result_broken.cov_beta))
+		c1         = result_cut.beta[0]
+		gamma1     = result_broken.beta[1]
+		gamma1_err = errors[1]
+		cut_err = errors[2]
+			
+		fit_plot = pl_fit.cut_pl_func(result_broken.beta, xplot)
+		fit_plot[fit_plot == 0] = np.nan
+		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(cut, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(cut_err))#, lw=lwd)
+		ax.axvline(x=breakp, color='purple', linestyle='--', label=r'$\mathregular{E_b=}$ '+str(round(cut*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(cut_err*1e3, ndigits=0))+' keV')
+		
+		result_dataframe["Reduced chi sq"] = redchi_broken
+		result_dataframe["c1"] = c1
+		result_dataframe["c1 err"] = errors[0]
+		result_dataframe["Gamma1"] = gamma1
+		result_dataframe["Gamma1 err"] = gamma1_err
+		result_dataframe["Exponential cutoff point [MeV]"] = cut
+		result_dataframe["Cutoff err [MeV]"] = cut_err
+		
+	if which_fit_final == 'broken_cut':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
 		result_cut = result_final
 		result        = result_final

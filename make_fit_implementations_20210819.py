@@ -787,6 +787,70 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 						cut_final = np.nan
 						c1_final = c1_random
 
+	if which_fit == 'cut':
+		# even if the which_fit is broken we need to check first if the break point is outside of the energy range. In that case we have to change it to single.
+		result_cut_guess = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess,  c1 = c1_guess, E_break = break_guess, E_cut = cut_guess, maxit=10000)
+		cut = result_cut_guess.beta[2]
+		
+		if cut < e_min or cut > e_max:
+			print('The cutoff point is outside of the energy range')
+			which_fit_final = 'single'
+			result_single_pl_guess = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_guess, c1=c1_guess)
+			result_final = result_single_pl_guess
+			redchi_guess  = result_single_pl_guess.res_var  
+			redchi_final = redchi_guess
+			gamma1_final = g1_guess
+			gamma2_final = np.nan
+			alpha_final = np.nan
+			break_final = np.nan
+			cut_final = np.nan
+			c1_final = c1_guess
+		if cut >= e_min and cut <=e_max:
+			which_fit_final = 'broken'
+			result_final = result_cut_guess
+			redchi_guess  = result_cut_guess.res_var
+			redchi_final = redchi_guess
+			gamma1_final = g1_guess
+			gamma2_final = np.nan
+			alpha_final = np.nan
+			break_final = np.nan
+			cut_final = cut_guess
+			c1_final = c1_guess
+		
+		if use_random :
+			for i in range(iterations):
+				#need [0] because it's an array
+				g1_random = np.random.choice(gamma1_array, 1)[0]
+				cut_random = np.random.choice(cut_array,1)[0]
+				c1_random = np.random.choice(c1_array, 1)[0]
+				result_cut_random = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = g1_random, gamma2 = g2_random, c1 = c1_random, alpha = alpha_random, E_break = break_random, maxit=10000)
+				cut = result_cut_random.beta[2]
+				if cut < e_min or cut > e_max:
+					result_single_pl_random = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_random, c1=c1_random)
+					redchi_random  = result_single_pl_random.res_var  
+					if redchi_random < redchi_final:
+						which_fit_final = 'single'
+						redchi_final = redchi_random
+						result_final = result_single_pl_random
+						gamma1_final = g1_random
+						gamma2_final = np.nan
+						alpha_final = np.nan
+						break_final = np.nan
+						cut_final = np.nan
+						c1_final = c1_random
+				if cut >= e_min and cut <=e_max:
+					redchi_random = result_broken_random.res_var
+					if redchi_random < redchi_final:
+						which_fit_final = 'cut'
+						redchi_final = redchi_random
+						result_final =result_broken_random
+						gamma1_final = g1_random
+						gamma2_final = np.nan
+						alpha_final = np.nan
+						break_final = np.nan
+						cut_final = cut
+						c1_final = c1_random
+
 	
 	if which_fit == 'single':
 		which_fit_final = 'single'
@@ -1003,7 +1067,8 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	if path2 != None:
 		result_dataframe.to_csv(path2, sep = ";")
 
-	print('The fitting variable c1 is ' ,c1)
+	#c1 = result.beta[0]
+	#print('The fitting variable c1 is ' ,c1)
 	return result
 	
 	

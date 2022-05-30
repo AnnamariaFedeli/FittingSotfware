@@ -70,7 +70,7 @@ slope = 'slope_07'
 # 'best_cb' 
 
 
-which_fit = 'best_sb' 
+which_fit = 'cut' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193

@@ -165,6 +165,27 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						result = result_cut_break
 						print('111111111')
 						return([which_fit, redchi, result])
+
+					else:
+						if redchi_single<redchi_broken and redchi_single<redchi_cut:
+							which_fit = 'single'
+							redchi = redchi_single
+							result = result_single_pl
+							print('11111')
+							return([which_fit, redchi, result])
+						if redchi_broken<=redchi_single and redchi_broken<=redchi_cut:
+							which_fit = 'broken'
+							redchi = redchi_broken
+							result = result_broken
+							print('111111')
+							return([which_fit, redchi, result])
+						if redchi_cut<redchi_broken and redchi_cut<redchi_single:
+							which_fit = 'cut'
+							redchi = redchi_cut							
+							result = result_cut
+							print('1111111')
+							return([which_fit, redchi, result])
+
 				if cut_b<= breakp_cut:	
 					if redchi_single<redchi_broken and redchi_single<redchi_cut:
 						which_fit = 'single'
@@ -1001,13 +1022,13 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			gamma2     = result_broken.beta[1]
 			gamma2_err = errors[1]
 			
-		if gamma1<gamma2:
-			gamma_temp = gamma1
-			gamma_temp_err = gamma1_err
-			gamma1 = gamma2
-			gamma1_err = gamma2_err
-			gamma2 = gamma_temp
-			gamma2_err = gamma_temp_err
+		##if gamma1<gamma2:
+		#	gamma_temp = gamma1
+		#	gamma_temp_err = gamma1_err
+		#	gamma1 = gamma2
+		#	gamma1_err = gamma2_err
+		#	gamma2 = gamma_temp
+		#	gamma2_err = gamma_temp_err
 			
 			
 		fit_plot = pl_fit.broken_pl_func(result_broken.beta, xplot)

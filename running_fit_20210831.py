@@ -24,11 +24,14 @@ loader.exec_module( mymodule )
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/20201118-1314/5min/sun/'
-path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/20201118-1314/5min/sun/'# if savefig is true
+folder = '20201118-1314/5min/sun/'
 
 date_string = '2020-11-18'
 averaging = '5min'
+
+path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder
+path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder# if savefig is true
+
 
 step = True
 ept  = True
@@ -48,16 +51,16 @@ het_file_name = 'electron_data-'+date_string+'-het-l2-'+averaging+'_averaging.cs
 sigma = 3
 rel_err = 0.5
 frac_nan_threshold = 0.9
-leave_out_1st_het_chan = False
+leave_out_1st_het_chan = True
 shift_step_data = False
 shift_factor = None #0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'step_ept_het' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'step' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
-window_type = 'One slope D = 1 AU' #'two slopes D = 1.191 AU & 1.7 AU'
-slope = 'slope_07'
+window_type = 'One slope D = 0.95 AU' #'two slopes D = 1.191 AU & 1.7 AU'
+slope = 'slope095'
 
 # which_fit options: 
 # 'single' will force a single pl fit to the data
@@ -70,7 +73,7 @@ slope = 'slope_07'
 # 'best_cb' 
 
 
-which_fit = 'cut' 
+which_fit = 'best' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
@@ -85,7 +88,7 @@ g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
 alpha_guess = 7.16
-break_guess = 0.1#in MeV
+break_guess = 1#in MeV
 cut_guess = 0.12#in MeV
 
 # if use_random = False the fit will only be made once with the guess values
@@ -175,20 +178,21 @@ prim_e = data['Primary_energy']
 
 pickle_path = None
 if save_pickle:
-	pickle_path = path_to_file+date_string+'-pickle_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.p'
+	pickle_path = path_to_file+date_string+'-pickle_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'-'+direction+'.p'
 
 fit_var_path = None
 if save_fit_variables:
-	fit_var_path = path_to_file+date_string+'-fit-result-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.csv'
+	fit_var_path = path_to_file+date_string+'-fit-result-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'-'+direction+'.csv'
 
 fitrun_path = None
 if save_fitrun:
-	fitrun_path = path_to_file+date_string+'-all-fit-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'.csv'
+	fitrun_path = path_to_file+date_string+'-all-fit-variables_'+fit_type+'-'+fit_to+'-'+which_fit+'-l2-'+averaging+'-'+direction+'.csv'
 	
 	mymodule.save_info_fit(fitrun_path, date_string, averaging, direction, data_product, dist, step, ept, het,
 	sigma, rel_err, frac_nan_threshold, leave_out_1st_het_chan, shift_factor, fit_type, fit_to,
-	window_type, which_fit, e_min, e_max, g1_guess, g2_guess, c1_guess, alpha_guess, break_guess,
+	window_type, which_fit, e_min, e_max, g1_guess, g2_guess, c1_guess, alpha_guess, break_guess, cut_guess,
 	use_random, iterations)
+
 
 
 # <---------------------------------------------------------------------DATA--------------------------------------------------------------------->
@@ -394,24 +398,27 @@ e_range_max = None
 step_energy_range = [0.004323343613,0.07803193193]
 ept_energy_range =  [0.03295087252,0.452730295]
 het_energy_range =  [0.6859485403,10.62300288]
-if fit_type == 'step':
-	e_range_min = step_energy_range[0]
-	e_range_max = step_energy_range[1]
-if fit_type == 'step_ept':
-	e_range_min = step_energy_range[0]
-	e_range_max = ept_energy_range[1]
-if fit_type == 'step_ept_het':
-	e_range_min = step_energy_range[0]
-	e_range_max = het_energy_range[1]
-if fit_type == 'ept':
-	e_range_min = ept_energy_range[0]
-	e_range_max = ept_energy_range[1]
-if fit_type == 'ept_het':
-	e_range_min = ept_energy_range[0]
-	e_range_max = het_energy_range[1]
-if fit_type =='het':
-	e_range_min = het_energy_range[0]
-	e_range_max = het_energy_range[1]
+#if fit_type == 'step':
+#	e_range_min = step_energy_range[0]
+#	e_range_max = step_energy_range[1]
+#if fit_type == 'step_ept':
+#	e_range_min = step_energy_range[0]
+#	e_range_max = ept_energy_range[1]
+#if fit_type == 'step_ept_het':
+#	e_range_min = step_energy_range[0]
+#	e_range_max = het_energy_range[1]
+#if fit_type == 'ept':
+#	e_range_min = ept_energy_range[0]
+#	e_range_max = ept_energy_range[1]
+#if fit_type == 'ept_het':
+#	e_range_min = ept_energy_range[0]
+#	e_range_max = het_energy_range[1]
+#if fit_type =='het':
+#	e_range_min = het_energy_range[0]
+#	e_range_max = het_energy_range[1]
+
+e_range_min = step_energy_range[0]
+e_range_max = het_energy_range[1]
 
 ax.set_xscale('log')
 ax.set_yscale('log')
@@ -428,7 +435,7 @@ plt.title(plot_title+'  '+peak_info+'\n'+date_str+'  '+averaging+'  averaging')
 
 if savefig:
 	if make_fit:
-		plt.savefig(path_to_savefig+date_string+'-'+averaging+'-'+fit_type+'-'+slope+'-'+fit_to, dpi=300)
+		plt.savefig(path_to_savefig+date_string+'-'+direction+'-'+averaging+'-'+which_fit+'-'+fit_type+'-'+slope+'-'+fit_to, dpi=300)
 	if make_fit is False:
 		if step and ept and het:
 			plt.savefig(path_to_savefig+date_string+'-'+averaging+'-no_fit-'+slope+'-step_ept_het', dpi=300)

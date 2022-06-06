@@ -104,16 +104,16 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	redchi_broken = result_broken.res_var
 	breakp        = result_broken.beta[4]	
 
-	if E_cut != None:
-		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
-		redchi_cut= result_broken.res_var
-		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
-
+	#if E_cut != None:
+	#	result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
+	#	redchi_cut= result_broken.res_var
+	#	cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
 
 	
-	which_fit = 'single'
-	redchi = 0
-	
+	#which_fit = 'single'
+	#redchi = 0
+	#result = ''
+	#print(type(result))
 	# cut break check	
 	if fit == 'best':
 		result_cut_break = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1, gamma2=gamma2, c1=c1, alpha=alpha, E_break=E_break, E_cut = E_cut, print_report=False, maxit=10000)
@@ -121,59 +121,92 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		breakp_cut = result_cut_break.beta[4]
 		#The cut of te break + cutoff
 		cut_b = result_cut_break.beta[5]
+
+		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
+		redchi_cut= result_broken.res_var
+		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
+
+		print('129')
 		if redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single and redchi_cut_break< redchi_cut:
 			if cut_b < e_min or cut_b > e_max:
 				if breakp_cut < e_min or breakp_cut > e_max:
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
+					print('1')
+					return([which_fit, redchi, result])
 				# Need to compare break and cut to see which actually fits better
 				if breakp >= e_min and breakp <=e_max:
 					if redchi_broken<=redchi_cut:
 						which_fit = 'broken'
 						redchi = redchi_broken
 						result = result_broken
+						print('11')
+						return([which_fit, redchi, result])
 					if redchi_cut < redchi_broken:
 						which_fit = 'cut'
 						redchi = redchi_cut
 						result = result_cut
+						print('111')
+						return([which_fit, redchi, result])
 				else:
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
+					print('1111')
+					return([which_fit, redchi, result])
+
+
 			if cut_b >= e_min and cut_b<= e_max:
-				if breakp_cut < e_min or breakp_cut > e_max:
-			# should this be broken? because if there is a break it might be break and not cut...
-					if redchi_single<redchi_broken and redchi_single<redchi_cut:
-						which_fit = 'single'
-						redchi = redchi_single
-						result = result_single_pl
-					if redchi_broken<redchi_single and redchi_broken<redchi_cut:
-						which_fit = 'broken'
-						redchi = redchi_broken
-						result = result_broken
-					if redchi_cut<redchi_broken and redchi_cut<redchi_broken:
-						which_fit = 'cut'
-						redchi = redchi_cut
-						result = result_cut
-				if breakp_cut >= e_min and breakp_cut <= e_max:
-					which_fit = 'broken_cut'
-					redchi = redchi_cut_break
-					result = result_cut_break
+				if cut_b> breakp_cut:
+					if breakp_cut >= e_min and breakp_cut <= e_max:
+						which_fit = 'broken_cut'
+						redchi = redchi_cut_break
+						result = result_cut_break
+						print('111111111')
+						return([which_fit, redchi, result])
+				if cut_b< breakp_cut:	
+					if breakp_cut < e_min or breakp_cut > e_max:
+						if redchi_single<redchi_broken and redchi_single<redchi_cut:
+							which_fit = 'single'
+							redchi = redchi_single
+							result = result_single_pl
+							print('11111')
+							return([which_fit, redchi, result])
+						if redchi_broken<redchi_single and redchi_broken<redchi_cut:
+							which_fit = 'broken'
+							redchi = redchi_broken
+							result = result_broken
+							print('111111')
+							return([which_fit, redchi, result])
+						if redchi_cut<redchi_broken and redchi_cut<redchi_broken:
+							which_fit = 'cut'
+							redchi = redchi_cut
+							result = result_cut
+							print('1111111')
+							return([which_fit, redchi, result])
+							
+				
 	
 		if redchi_broken<=redchi_single and redchi_broken <=redchi_cut_break:
 			if breakp < e_min or breakp > e_max:
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
+				print('2')
+				return([which_fit, redchi, result])
 			if breakp >= e_min and breakp <=e_max:
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
+				print('22')
+				return([which_fit, redchi, result])
 		if redchi_broken>redchi_single and redchi_cut_break>redchi_single:
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
+			print('222')
+			return([which_fit, redchi, result])
 	
 	if fit == 'best_sb':
 		if redchi_broken<=redchi_single:
@@ -181,37 +214,49 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
+				return([which_fit, redchi, result])
 			if breakp >= e_min and breakp <=e_max:	
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
+				return([which_fit, redchi, result])
 		if redchi_broken>redchi_single:
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
+			return([which_fit, redchi, result])
 
 	if fit == 'best_cb':
+		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
+		redchi_cut= result_broken.res_var
+		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
+
 		if redchi_broken<=redchi_cut:
 			if breakp < e_min or breakp > e_max:
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
+				return([which_fit, redchi, result])
 			if breakp >= e_min and breakp <=e_max:	
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
+				return([which_fit, redchi, result])
 		if redchi_broken>redchi_cut:
 			if cut < e_min or cut > e_max:
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
+				return([which_fit, redchi, result])
 			if cut >= e_min and cut <=e_max:	
 				which_fit = 'cut'
 				redchi = redchi_cut
 				result = result_cut
+				return([which_fit, redchi, result])
 			
-		
-	return([which_fit, redchi, result])
+	# print(result)
+	
+	#return([which_fit, redchi, result])
 	
 	
 def find_c1(spec_e, spec_flux, e_min, e_max):
@@ -899,11 +944,20 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		ax.plot(xplot, pl_fit.simple_pl([c1, gamma1], xplot), '-', color=color[direction], label=r'$\mathregular{\delta=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err))
 		ax.plot(xplot, pl_fit.simple_pl([c1, gamma1], xplot), '--k', zorder=10)
 
+
 		result_dataframe["Reduced chi sq"] = redchi_single
 		result_dataframe["c1"] = c1
 		result_dataframe["c1 err"] = errors[0]
 		result_dataframe["Gamma1"] = gamma1
 		result_dataframe["Gamma1 err"] = gamma1_err
+		result_dataframe["Gamma2"] = None
+		result_dataframe["Gamma2 err"] = None
+		result_dataframe["Break point [MeV]"] = None
+		result_dataframe["Break point err [MeV]"] = None 
+		result_dataframe["Exponential cutoff point [MeV]"] = None
+		result_dataframe["Cutoff err [MeV]"] = None
+		result_dataframe["Alpha"] = None
+
 
 	if which_fit_final == 'broken':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
@@ -943,7 +997,8 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		fit_plot[fit_plot == 0] = np.nan
 		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(gamma2, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma2_err)+'\n'+r'$\mathregular{\alpha=}$%5.2f' %round(alpha, ndigits=2))#, lw=lwd)
 		ax.axvline(x=breakp, color='blue', linestyle='--', label=r'$\mathregular{E_b=}$ '+str(round(breakp*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(breakp_err*1e3, ndigits=0))+' keV')
-		
+	
+
 		result_dataframe["Reduced chi sq"] = redchi_broken
 		result_dataframe["c1"] = c1
 		result_dataframe["c1 err"] = errors[0]
@@ -953,6 +1008,8 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		result_dataframe["Gamma2 err"] = gamma2_err
 		result_dataframe["Break point [MeV]"] = breakp
 		result_dataframe["Break point err [MeV]"] = breakp_err
+		result_dataframe["Exponential cutoff point [MeV]"] = None
+		result_dataframe["Cutoff err [MeV]"] = None
 		result_dataframe["Alpha"] = alpha
 
 
@@ -963,7 +1020,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		cut        = result_cut.beta[2]
 			#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
 		dof           = len(spec_e) - len(result_cut.beta)
-		redchi_broken = result_cut.res_var
+		redchi_cut = result_cut.res_var
 		t_val      = studentt.interval(0.95, dof)[1]
 		errors     = t_val * result_cut.sd_beta  #np.sqrt(np.diag(result_broken.cov_beta))
 		c1         = result_cut.beta[0]
@@ -976,13 +1033,19 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(cut, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(cut_err))#, lw=lwd)
 		ax.axvline(x=cut, color='purple', linestyle='--', label=r'$\mathregular{E_b=}$ '+str(round(cut*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(cut_err*1e3, ndigits=0))+' keV')
 		
-		result_dataframe["Reduced chi sq"] = redchi_broken
+
+		result_dataframe["Reduced chi sq"] = redchi_cut
 		result_dataframe["c1"] = c1
 		result_dataframe["c1 err"] = errors[0]
 		result_dataframe["Gamma1"] = gamma1
 		result_dataframe["Gamma1 err"] = gamma1_err
+		result_dataframe["Gamma2"] = None
+		result_dataframe["Gamma2 err"] = None
+		result_dataframe["Break point [MeV]"] = None
+		result_dataframe["Break point err [MeV]"] = None
 		result_dataframe["Exponential cutoff point [MeV]"] = cut
 		result_dataframe["Cutoff err [MeV]"] = cut_err
+		result_dataframe["Alpha"] = None
 		
 	if which_fit_final == 'broken_cut':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)

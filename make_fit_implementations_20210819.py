@@ -123,7 +123,7 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		cut_b = result_cut_break.beta[5]
 
 		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
-		redchi_cut= result_broken.res_var
+		redchi_cut= result_cut.res_var
 		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
 
 		print('129')
@@ -165,48 +165,64 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						result = result_cut_break
 						print('111111111')
 						return([which_fit, redchi, result])
-				if cut_b< breakp_cut:	
-					if breakp_cut < e_min or breakp_cut > e_max:
-						if redchi_single<redchi_broken and redchi_single<redchi_cut:
-							which_fit = 'single'
-							redchi = redchi_single
-							result = result_single_pl
-							print('11111')
-							return([which_fit, redchi, result])
-						if redchi_broken<redchi_single and redchi_broken<redchi_cut:
-							which_fit = 'broken'
-							redchi = redchi_broken
-							result = result_broken
-							print('111111')
-							return([which_fit, redchi, result])
-						if redchi_cut<redchi_broken and redchi_cut<redchi_broken:
-							which_fit = 'cut'
-							redchi = redchi_cut
-							result = result_cut
-							print('1111111')
-							return([which_fit, redchi, result])
+				if cut_b<= breakp_cut:	
+					if redchi_single<redchi_broken and redchi_single<redchi_cut:
+						which_fit = 'single'
+						redchi = redchi_single
+						result = result_single_pl
+						print('11111')
+						return([which_fit, redchi, result])
+					if redchi_broken<=redchi_single and redchi_broken<=redchi_cut:
+						which_fit = 'broken'
+						redchi = redchi_broken
+						result = result_broken
+						print('111111')
+						return([which_fit, redchi, result])
+					if redchi_cut<redchi_broken and redchi_cut<redchi_single:
+						which_fit = 'cut'
+						redchi = redchi_cut							
+						result = result_cut
+						print('1111111')
+						return([which_fit, redchi, result])
 							
 				
 	
-		if redchi_broken<=redchi_single and redchi_broken <=redchi_cut_break:
-			if breakp < e_min or breakp > e_max:
+		if redchi_broken<=redchi_single and redchi_broken <=redchi_cut_break and redchi_broken<= redchi_cut:
+			if breakp <= e_min or breakp >= e_max:
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
 				print('2')
 				return([which_fit, redchi, result])
-			if breakp >= e_min and breakp <=e_max:
+			if breakp > e_min and breakp <e_max:
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
 				print('22')
 				return([which_fit, redchi, result])
-		if redchi_broken>redchi_single and redchi_cut_break>redchi_single:
+
+		if redchi_cut<redchi_single and redchi_cut <redchi_cut_break and redchi_cut < redchi_broken:
+			if cut <= e_min or cut >= e_max:
+				which_fit = 'single'
+				redchi = redchi_single
+				result = result_single_pl
+				print('3')
+				return([which_fit, redchi, result])
+			if cut > e_min and cut <e_max:
+				which_fit = 'cut'
+				redchi = redchi_cut
+				result = result_cut
+				print('33')
+				return([which_fit, redchi, result])
+
+		if redchi_broken>redchi_single and redchi_cut_break>redchi_single and redchi_cut>redchi_single:
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
 			print('222')
 			return([which_fit, redchi, result])
+
+
 	
 	if fit == 'best_sb':
 		if redchi_broken<=redchi_single:
@@ -399,6 +415,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	#if redchi is better, substitute values
 		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_guess, E_cut = cut_guess, fit = 'best', maxit=10000, e_min = e_min, e_max = e_max)
 		redchi_guess = which_fit_guess[1]
+		print(redchi_guess)
 		redchi_final = redchi_guess
 		which_fit_final = which_fit_guess[0]
 		result_final = which_fit_guess[2]

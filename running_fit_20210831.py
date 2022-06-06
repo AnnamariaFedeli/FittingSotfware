@@ -24,7 +24,7 @@ loader.exec_module( mymodule )
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-folder = '20201118-1314/5min/sun/'
+folder = '20201118-1415/5min/sun/'
 
 date_string = '2020-11-18'
 averaging = '5min'
@@ -57,10 +57,10 @@ shift_factor = None #0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'step' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
-window_type = 'One slope D = 0.95 AU' #'two slopes D = 1.191 AU & 1.7 AU'
-slope = 'slope095'
+window_type = 'One slope D = 1.2 AU' #'two slopes D = 1.191 AU & 1.7 AU'
+slope = 'slope120'
 
 # which_fit options: 
 # 'single' will force a single pl fit to the data
@@ -99,10 +99,10 @@ use_random = True
 iterations = 20
 
 
-savefig = False # save the fit
-save_pickle = False # save a pickle file of the odr run
-save_fit_variables = False # save the variables from the fit
-save_fitrun = False # save all variables used for the fit
+savefig = True # save the fit
+save_pickle = True # save a pickle file of the odr run
+save_fit_variables = True # save the variables from the fit
+save_fitrun = True # save all variables used for the fit
 # <-------------------------------------------------------------- END OF NECESSARY INPUTS ---------------------------------------------------------------->
 
 

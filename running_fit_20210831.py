@@ -24,10 +24,10 @@ loader.exec_module( mymodule )
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-folder = '20201119-0548/2min/sun/'
+folder = '20201119-0548/1min/sun/'
 
 date_string = '2020-11-19'
-averaging = '2min'
+averaging = '1min'
 
 path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder
 path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder# if savefig is true

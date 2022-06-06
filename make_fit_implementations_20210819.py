@@ -125,9 +125,13 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
 		redchi_cut= result_cut.res_var
 		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
-
+		
+		difference = cut_b-breakp_cut
+		print(cut_b)
+		print(breakp_cut)
+		print(cut_b-breakp_cut)
 		print('129')
-		if redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single and redchi_cut_break< redchi_cut:
+		if difference>0.01 and redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single and redchi_cut_break< redchi_cut:
 			if cut_b < e_min or cut_b > e_max:
 				if breakp_cut < e_min or breakp_cut > e_max:
 					which_fit = 'single'
@@ -207,7 +211,43 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						return([which_fit, redchi, result])
 							
 				
-	
+		if difference<=0.01:
+			if redchi_broken<=redchi_single and redchi_broken<= redchi_cut:
+				if breakp <= e_min or breakp >= e_max:
+					which_fit = 'single'
+					redchi = redchi_single
+					result = result_single_pl
+					print('2')
+					return([which_fit, redchi, result])
+				if breakp > e_min and breakp <e_max:
+					which_fit = 'broken'
+					redchi = redchi_broken
+					result = result_broken
+					print('22')
+					return([which_fit, redchi, result])
+
+			if redchi_cut<redchi_single and  redchi_cut < redchi_broken:
+				if cut <= e_min or cut >= e_max:
+					which_fit = 'single'
+					redchi = redchi_single
+					result = result_single_pl
+					print('3')
+					return([which_fit, redchi, result])
+				if cut > e_min and cut <e_max:
+					which_fit = 'cut'
+					redchi = redchi_cut
+					result = result_cut
+					print('33')
+					return([which_fit, redchi, result])
+
+			if redchi_broken>redchi_single and redchi_cut>redchi_single:
+				which_fit = 'single'
+				redchi = redchi_single
+				result = result_single_pl
+				print('222')
+				return([which_fit, redchi, result])
+
+
 		if redchi_broken<=redchi_single and redchi_broken <=redchi_cut_break and redchi_broken<= redchi_cut:
 			if breakp <= e_min or breakp >= e_max:
 				which_fit = 'single'
@@ -967,6 +1007,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	
 	result_dataframe = pd.DataFrame({"FInal fit type":which_fit_final}, index = [0])
 	result = result_final
+	print(which_fit_final)
 	if which_fit_final == 'single':
 		#result_single_pl = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1_final, c1=c1_final)
 		result_single_pl = result_final
@@ -996,7 +1037,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		result_dataframe["Cutoff err [MeV]"] = None
 		result_dataframe["Alpha"] = None
 
-
+	
 	if which_fit_final == 'broken':
 		#result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err,  gamma1=gamma1_final, gamma2=gamma2_final, c1 = c1_final, alpha=alpha_final,E_break=break_final, maxit=10000)
 		result_broken = result_final
@@ -1112,13 +1153,13 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			gamma2     = result_cut.beta[1]
 			gamma2_err = errors[1]
 			
-		if gamma1<gamma2:
-			gamma_temp = gamma1
-			gamma_temp_err = gamma1_err
-			gamma1 = gamma2
-			gamma1_err = gamma2_err
-			gamma2 = gamma_temp
-			gamma2_err = gamma_temp_err
+		##if gamma1<gamma2:
+		#	gamma_temp = gamma1
+		#	gamma_temp_err = gamma1_err
+		#	gamma1 = gamma2
+		#	gamma1_err = gamma2_err
+		#	gamma2 = gamma_temp
+		#	gamma2_err = gamma_temp_err
 		
 			
 		fit_plot = pl_fit.cut_break_pl_func(result_cut.beta, xplot)

@@ -24,10 +24,10 @@ loader.exec_module( mymodule )
 # this path is also used to create new files for all and contaminated data.
 #                C:\Users\Omistaja\Desktop\SRL\2021SRL\epd_plot-main\solo_loader-main-shift\csv\18-Nov-20 1420-two-slopes
 
-folder = '20201119-0548/1min/sun/'
+folder = '20210507-1852/2min/sun/'
 
-date_string = '2020-11-19'
-averaging = '1min'
+date_string = '2021-05-07'
+averaging = '2min'
 
 path_to_file = r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder
 path_to_savefig =  r'C:/Users/Omistaja/Desktop/SRL/2021SRL/epd_plot-main/solo_loader-main-shift/events/'+folder# if savefig is true
@@ -57,10 +57,10 @@ shift_factor = None #0.8
 
 # !!! INPUTS FOR THE FIT !!!
 
-fit_type = 'step_ept' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
+fit_type = 'step_ept_het' # fit_type options: step, ept, het, step_ept, step_ept_het, ept_het
 fit_to = 'peak'   # 'peak' or 'average'for window peak or average
-window_type = 'One slope D = 0.95 AU' #'two slopes D = 1.191 AU & 1.7 AU'
-slope = 'slope095'
+window_type = 'One slope D = 1.6 AU' #'two slopes D = 1.191 AU & 1.7 AU'
+slope = 'slope16'
 
 # which_fit options: 
 # 'single' will force a single pl fit to the data
@@ -73,7 +73,7 @@ slope = 'slope095'
 # 'best_cb' 
 
 
-which_fit = 'best' 
+which_fit ='broken_cut' 
 
 #!!! e_min, e_max, break_guess and cut_guess SHOULD BE IN MeV !!!
 # step energy range: 0.004323343613-0.07803193193
@@ -82,13 +82,13 @@ which_fit = 'best'
 # second het channel: 1.590048112
 # e_min and e_max can also be None. In this case the MAKE_THE_FIT function will automaically choose the values
 
-e_min =  None# in MeV
+e_min = None # in MeV
 e_max =	None # in MeV
 g1_guess = -1.9
 g2_guess = -2.5
 c1_guess = 1e3
 alpha_guess = 7.16
-break_guess = 1#in MeV
+break_guess = 0.1#in MeV
 cut_guess = 0.12#in MeV
 
 # if use_random = False the fit will only be made once with the guess values

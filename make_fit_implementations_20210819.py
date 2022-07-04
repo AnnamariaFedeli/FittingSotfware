@@ -115,7 +115,26 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	#result = ''
 	#print(type(result))
 	# cut break check	
-	if fit == 'best':
+	if fit == 'single':
+		which_fit = 'single'
+		redchi = redchi_single
+		result = result_single_pl
+		return([which_fit, redchi, result])
+
+	if fit == 'broken':
+		if breakp < e_min or breakp > e_max:
+			which_fit = 'single'
+			redchi = redchi_single
+			result = result_single_pl
+			return([which_fit, redchi, result])
+		if breakp >= e_min and breakp <=e_max:	
+			which_fit = 'broken'
+			redchi = redchi_broken
+			result = result_broken
+			return([which_fit, redchi, result])
+	
+
+	if fit == 'best' or fit == 'broken_cut':
 		result_cut_break = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1, gamma2=gamma2, c1=c1, alpha=alpha, E_break=E_break, E_cut = E_cut, print_report=False, maxit=10000)
 		redchi_cut_break = result_cut_break.res_var
 		breakp_cut = result_cut_break.beta[4]
@@ -330,6 +349,11 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 				redchi = redchi_cut
 				result = result_cut
 				return([which_fit, redchi, result])
+
+
+	
+
+	
 			
 	# print(result)
 	
@@ -1109,7 +1133,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			
 		fit_plot = pl_fit.cut_pl_func(result_cut.beta, xplot)
 		fit_plot[fit_plot == 0] = np.nan
-		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{\delta_2=}$%5.2f' %round(cut, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(cut_err))#, lw=lwd)
+		ax.plot(xplot, fit_plot, '-b', label=r'$\mathregular{\delta_1=}$%5.2f' %round(gamma1, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(gamma1_err)+'\n'+r'$\mathregular{E_c=}$%5.2f' %round(cut, ndigits=2)+r"$\pm$"+'{0:.2f}'.format(cut_err))#, lw=lwd)
 		ax.axvline(x=cut, color='purple', linestyle='--', label=r'$\mathregular{E_c=}$ '+str(round(cut*1e3, ndigits=1))+'\n'+r"$\pm$"+str(round(cut_err*1e3, ndigits=0))+' keV')
 		
 

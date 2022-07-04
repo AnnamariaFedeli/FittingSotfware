@@ -76,7 +76,8 @@ def cut_break_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, c1=None, alpha=Non
 def cut_pl_func(p, x): #c1, gamma1, gamma2, alpha, E_break, E_cut
 
 	c1, gamma1, E_cut = p
-	
+	print(x,'x')
+	print(E_cut,'cut')
 	y = c1*(x/0.1)**gamma1 *np.exp(-(x/E_cut)**2)
 	
 	return y

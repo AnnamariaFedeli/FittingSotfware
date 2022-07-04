@@ -146,17 +146,13 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
 		
 		difference = cut_b-breakp_cut
-		print(cut_b)
-		print(breakp_cut)
-		print(cut_b-breakp_cut)
-		print('129')
+		
 		if difference>0.01 and redchi_cut_break<redchi_broken and redchi_cut_break <redchi_single and redchi_cut_break< redchi_cut:
 			if cut_b < e_min or cut_b > e_max:
 				if breakp_cut < e_min or breakp_cut > e_max:
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
-					print('1')
 					return([which_fit, redchi, result])
 				# Need to compare break and cut to see which actually fits better
 				if breakp >= e_min and breakp <=e_max:
@@ -164,19 +160,16 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						which_fit = 'broken'
 						redchi = redchi_broken
 						result = result_broken
-						print('11')
 						return([which_fit, redchi, result])
 					if redchi_cut < redchi_broken:
 						which_fit = 'cut'
 						redchi = redchi_cut
 						result = result_cut
-						print('111')
 						return([which_fit, redchi, result])
 				else:
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
-					print('1111')
 					return([which_fit, redchi, result])
 
 
@@ -186,7 +179,6 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						which_fit = 'broken_cut'
 						redchi = redchi_cut_break
 						result = result_cut_break
-						print('111111111')
 						return([which_fit, redchi, result])
 
 					else:
@@ -194,19 +186,16 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 							which_fit = 'single'
 							redchi = redchi_single
 							result = result_single_pl
-							print('11111')
 							return([which_fit, redchi, result])
 						if redchi_broken<=redchi_single and redchi_broken<=redchi_cut:
 							which_fit = 'broken'
 							redchi = redchi_broken
 							result = result_broken
-							print('111111')
 							return([which_fit, redchi, result])
 						if redchi_cut<redchi_broken and redchi_cut<redchi_single:
 							which_fit = 'cut'
 							redchi = redchi_cut							
 							result = result_cut
-							print('1111111')
 							return([which_fit, redchi, result])
 
 				if cut_b<= breakp_cut:	
@@ -214,19 +203,16 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 						which_fit = 'single'
 						redchi = redchi_single
 						result = result_single_pl
-						print('11111')
 						return([which_fit, redchi, result])
 					if redchi_broken<=redchi_single and redchi_broken<=redchi_cut:
 						which_fit = 'broken'
 						redchi = redchi_broken
 						result = result_broken
-						print('111111')
 						return([which_fit, redchi, result])
 					if redchi_cut<redchi_broken and redchi_cut<redchi_single:
 						which_fit = 'cut'
 						redchi = redchi_cut							
 						result = result_cut
-						print('1111111')
 						return([which_fit, redchi, result])
 							
 				
@@ -236,13 +222,11 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
-					print('2')
 					return([which_fit, redchi, result])
 				if breakp > e_min and breakp <e_max:
 					which_fit = 'broken'
 					redchi = redchi_broken
 					result = result_broken
-					print('22')
 					return([which_fit, redchi, result])
 
 			if redchi_cut<redchi_single and  redchi_cut < redchi_broken:
@@ -250,20 +234,17 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 					which_fit = 'single'
 					redchi = redchi_single
 					result = result_single_pl
-					print('3')
 					return([which_fit, redchi, result])
 				if cut > e_min and cut <e_max:
 					which_fit = 'cut'
 					redchi = redchi_cut
 					result = result_cut
-					print('33')
 					return([which_fit, redchi, result])
 
 			if redchi_broken>redchi_single and redchi_cut>redchi_single:
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
-				print('222')
 				return([which_fit, redchi, result])
 
 
@@ -272,13 +253,11 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
-				print('2')
 				return([which_fit, redchi, result])
 			if breakp > e_min and breakp <e_max:
 				which_fit = 'broken'
 				redchi = redchi_broken
 				result = result_broken
-				print('22')
 				return([which_fit, redchi, result])
 
 		if redchi_cut<redchi_single and redchi_cut <redchi_cut_break and redchi_cut < redchi_broken:
@@ -286,20 +265,17 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 				which_fit = 'single'
 				redchi = redchi_single
 				result = result_single_pl
-				print('3')
 				return([which_fit, redchi, result])
 			if cut > e_min and cut <e_max:
 				which_fit = 'cut'
 				redchi = redchi_cut
 				result = result_cut
-				print('33')
 				return([which_fit, redchi, result])
 
 		if redchi_broken>redchi_single and redchi_cut_break>redchi_single and redchi_cut>redchi_single:
 			which_fit = 'single'
 			redchi = redchi_single
 			result = result_single_pl
-			print('222')
 			return([which_fit, redchi, result])
 
 

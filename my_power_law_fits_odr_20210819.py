@@ -44,6 +44,66 @@ def broken_pl_func(p, x):#, c1, gamma1, gamma2, alpha, E_break):
 
     return y
 
+
+def broken_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, c1=None, alpha=None, E_break=0.1, print_report=False, maxit=20):
+	#covMatrix = np.cov(xerr,bias=False)
+
+	c1 = y[3] if c1==None else c1
+	alpha = 0.1 if alpha==None else alpha
+
+	plmodel = Model(broken_pl_func)
+	#print(broken_pl_func)
+	
+	# Create a RealData object using our initiated data from above.
+	data = RealData(x, y, sx=xerr, sy=yerr)
+	# Set up ODR with the model and data.
+	odr = ODR(data, plmodel, beta0=[c1, gamma1, gamma2, alpha, E_break], ifixb=[1,1,1,1,1], maxit=maxit)
+
+	# Run the regression.
+	result = odr.run()
+	#iprint = odr.set_iprint(init=2,  iter=2, iter_step = 1, final=2)
+	if print_report:
+		result.pprint()
+		#print(result.keys)
+
+	return result
+
+def triple_pl_func(p, x):#, c1, gamma1, gamma2, alpha, E_break):
+    '''
+    Mar 2020: functin 25 of prinsloo 2019 paper but withoug exponential roll-over
+    '''
+
+    c1, gamma1, gamma2, gamma3, alpha, beta, E_break_low, E_break_high = p
+
+    y = c1 * (x/0.1)**gamma1  * ((x**alpha + E_break_low**alpha)/(0.1**alpha+E_break_low**alpha))**((gamma2-gamma1)/alpha)* ((x**beta + E_break_high**beta)/(0.1**beta+E_break_high**beta))**((gamma3-gamma2)/beta)
+
+    return y
+
+
+def triple_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, gamma3 = -3, c1=None, alpha=None, beta = None, E_break_low=0.06, E_break_high = 0.12, print_report=False, maxit=20):
+	#covMatrix = np.cov(xerr,bias=False)
+
+	c1 = y[3] if c1==None else c1
+	alpha = 0.1 if alpha==None else alpha
+	beta = 0.1 if beta==None else beta
+
+	plmodel = Model(triple_pl_func)
+	#print(broken_pl_func)
+	
+	# Create a RealData object using our initiated data from above.
+	data = RealData(x, y, sx=xerr, sy=yerr)
+	# Set up ODR with the model and data.
+	odr = ODR(data, plmodel, beta0=[c1, gamma1, gamma2, gamma3, alpha, beta, E_break_low, E_break_high], ifixb=[1,1,1,1,1,1,1,1], maxit=maxit)
+
+	# Run the regression.
+	result = odr.run()
+	#iprint = odr.set_iprint(init=2,  iter=2, iter_step = 1, final=2)
+	if print_report:
+		result.pprint()
+		#print(result.keys)
+
+	return result
+
 def cut_break_pl_func(p, x): #c1, gamma1, gamma2, alpha, E_break, E_cut
 
 	c1, gamma1, gamma2, alpha, E_break, E_cut = p
@@ -103,28 +163,7 @@ def cut_pl_fit(x,y, xerr, yerr, gamma1=-1.8, c1=None, E_cut = 0.35, print_report
 
 	return result
 
-def broken_pl_fit(x,y, xerr, yerr, gamma1=-1.8, gamma2=-2, c1=None, alpha=None, E_break=0.1, print_report=False, maxit=20):
-	#covMatrix = np.cov(xerr,bias=False)
 
-	c1 = y[3] if c1==None else c1
-	alpha = 0.1 if alpha==None else alpha
-
-	plmodel = Model(broken_pl_func)
-	#print(broken_pl_func)
-	
-	# Create a RealData object using our initiated data from above.
-	data = RealData(x, y, sx=xerr, sy=yerr)
-	# Set up ODR with the model and data.
-	odr = ODR(data, plmodel, beta0=[c1, gamma1, gamma2, alpha, E_break], ifixb=[1,1,1,1,1], maxit=maxit)
-
-	# Run the regression.
-	result = odr.run()
-	#iprint = odr.set_iprint(init=2,  iter=2, iter_step = 1, final=2)
-	if print_report:
-		result.pprint()
-		#print(result.keys)
-
-	return result
 
 
 def line_intersect(g1, c1, g2, c2):

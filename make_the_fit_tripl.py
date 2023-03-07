@@ -87,7 +87,7 @@ def closest_values(array, value):
 	return(closest_values_array)
 	
 	
-def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, E_break,  E_cut= None, fit = 'best',  maxit=10000, e_min=None, e_max=None):
+def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, gamma3, c1, alpha, beta, E_break_low, E_break_high,  E_cut= None, fit = 'best',  maxit=10000, e_min=None, e_max=None):
 	#the function also checks if the break point is outside of the energy array (also the cutoff point)
 	#the min and max energies cannot be last and/or first points because it wouldn't be a physical result
 	if e_min is None:
@@ -100,14 +100,14 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	result_single_pl = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1)
 	redchi_single  = result_single_pl.res_var  
 										
-	result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, gamma2 = gamma2, c1 = c1, alpha = alpha, E_break = E_break, maxit=10000)
+	result_broken = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, gamma2 = gamma2, c1 = c1, alpha = alpha, E_break = E_break_low, maxit=10000)
 	redchi_broken = result_broken.res_var
 	breakp        = result_broken.beta[4]	
 
-	#if E_cut != None:
-	#	result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
-	#	redchi_cut= result_broken.res_var
-	#	cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
+	result_triple = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, gamma2 = gamma2, gamma3 = gamma3, c1 = c1, alpha = alpha, beta = beta, E_break_low = E_break_low, E_break_high = E_break_high, maxit=10000)
+	redchi_triple = result_broken.res_var
+	breakp_low    = result_broken.beta[5]	
+	breakp_high   = result_broken.beta[6]
 
 	
 	#which_fit = 'single'
@@ -120,6 +120,20 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 		redchi = redchi_single
 		result = result_single_pl
 		return([which_fit, redchi, result])
+	
+	if fit == 'cut':
+		result_cut = pl_fit.cut_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = gamma1, c1 = c1, E_cut = E_cut, maxit=10000)
+		redchi_cut= result_broken.res_var
+		cut        = result_cut.beta[2]	#shoud maybe make distinction between cut from cut pl and cut from cut broken pl
+		if cut < e_min or cut > e_max:
+			which_fit = 'single'
+			redchi = redchi_single
+			result = result_single_pl
+		if cut >= e_min and cut <=e_max:	
+			which_fit = 'broken'
+			redchi = redchi_cut
+			result = result_cut
+			return([which_fit, redchi, result])
 
 	if fit == 'broken':
 		if breakp < e_min or breakp > e_max:
@@ -135,7 +149,7 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, c1, alpha, 
 	
 
 	if fit == 'best' or fit == 'broken_cut':
-		result_cut_break = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1, gamma2=gamma2, c1=c1, alpha=alpha, E_break=E_break, E_cut = E_cut, print_report=False, maxit=10000)
+		result_cut_break = pl_fit.cut_break_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=gamma1, gamma2=gamma2, c1=c1, alpha=alpha, E_break=E_break_low, E_cut = E_cut, print_report=False, maxit=10000)
 		redchi_cut_break = result_cut_break.res_var
 		breakp_cut = result_cut_break.beta[4]
 		#The cut of te break + cutoff

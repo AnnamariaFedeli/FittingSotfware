@@ -130,7 +130,7 @@ def check_redchi(spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, gamma3, c1,
 			redchi = redchi_single
 			result = result_single_pl
 		if cut >= e_min and cut <=e_max:	
-			which_fit = 'broken'
+			which_fit = 'cut'
 			redchi = redchi_cut
 			result = result_cut
 			return([which_fit, redchi, result])

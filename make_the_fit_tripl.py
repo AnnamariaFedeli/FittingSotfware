@@ -495,12 +495,6 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	
 	which_fit_final = ''
 	
-	gamma1_final = 0
-	gamma2_final = 0
-	alpha_final = 0
-	break_final = 0
-	cut_final = 0
-	c1_final = 0
 	redchi_final = 0
 	
 	result_final = None
@@ -515,41 +509,14 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		redchi_final = redchi_guess
 		which_fit_final = which_fit_guess[0]
 		result_final = which_fit_guess[2]
-		if which_fit_guess[0] == 'single': 
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'broken': 
-			gamma1_final = g1_guess
-			gamma2_final = g2_guess
-			alpha_final = alpha_guess
-			break_final = break_low_guess
-			cut_final = np.nan
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'cut':
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = cut_guess
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'broken_cut':
-			gamma1_final = g1_guess
-			gamma2_final = g2_guess
-			alpha_final = alpha_guess
-			break_final = break_low_guess
-			cut_final = cut_guess
-			c1_final = c1_guess
+
 		if use_random :
 			for i in range(iterations):
 				#need [0] because it's an array
 				g1_random = np.random.choice(gamma1_array, 1)[0]
 				g2_random = np.random.choice(gamma2_array, 1)[0] 
 				#gamma2 should always be more negative (smaller) than gamma1
-				if g1_random<g2_random:
+				if g1_random < g2_random:
 					gamma = g1_random
 					g1_random = g2_random
 					g2_random = gamma
@@ -564,43 +531,19 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					if which_fit_random[0] == 'single':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'broken':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'cut':
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = cut_random
-						c1_final = c1_random	
+						
 					if which_fit_random[0] == 'broken_cut':
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = cut_random
-						c1_final = c1_random
 						
-
-
-
 
 
 	if which_fit == 'best_cb':
@@ -611,27 +554,6 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		redchi_final = redchi_guess
 		which_fit_final = which_fit_guess[0]
 		result_final = which_fit_guess[2]
-		if which_fit_guess[0] == 'single': 
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'broken': 
-			gamma1_final = g1_guess
-			gamma2_final = g2_guess
-			alpha_final = alpha_guess
-			break_final = break_low_guess
-			cut_final = np.nan
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'cut':
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = cut_guess
-			c1_final = c1_guess
 		
 		if use_random :
 			for i in range(iterations):
@@ -654,30 +576,15 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					if which_fit_random[0] == 'single':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'broken':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'cut':
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = cut_random
-						c1_final = c1_random	
+						
 					
 
 	if which_fit == 'best_sb':
@@ -688,20 +595,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		redchi_final = redchi_guess
 		which_fit_final = which_fit_guess[0]
 		result_final = which_fit_guess[2]
-		if which_fit_guess[0] == 'single': 
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
-		if which_fit_guess[0] == 'broken': 
-			gamma1_final = g1_guess
-			gamma2_final = g2_guess
-			alpha_final = alpha_guess
-			break_final = break_low_guess
-			cut_final = np.nan
-			c1_final = c1_guess
+		
 		if use_random :
 			for i in range(iterations):
 				#need [0] because it's an array
@@ -722,21 +616,11 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					if which_fit_random[0] == 'single':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'broken':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = np.nan
-						c1_final = c1_random
+						
 
 	
 	if which_fit == 'broken_cut':
@@ -751,30 +635,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			redchi_final = redchi_guess
 			which_fit_final = which_fit_guess[0]
 			result_final = which_fit_guess[2]
-			if which_fit_guess[0] == 'single': 
-				gamma1_final = g1_guess
-				gamma2_final = np.nan
-				alpha_final = np.nan
-				break_final = np.nan
-				cut_final = np.nan
-				c1_final = c1_guess
-			if which_fit_guess[0] == 'broken': 
-				gamma1_final = g1_guess
-				gamma2_final = g2_guess
-				alpha_final = alpha_guess
-				break_final = break_low_guess
-				cut_final = np.nan
-				c1_final = c1_guess
-			if which_fit_guess[0] == 'cut': 
-				gamma1_final = g1_guess
-				gamma2_final = g2_guess
-				alpha_final = alpha_guess
-				break_final = break_low_guess
-				cut_final = cut_guess
-				c1_final = c1_guess
-
-
-
+			
 		if breakp_cut >= e_min and breakp_cut <=e_max:
 			if cut_b <=e_min or cut_b >=e_max:
 				# The breaks are checked by redchi
@@ -783,39 +644,12 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				redchi_final = redchi_guess
 				which_fit_final = which_fit_guess[0]
 				result_final = which_fit_guess[2]
-				if which_fit_guess[0] == 'single': 
-					gamma1_final = g1_guess
-					gamma2_final = np.nan
-					alpha_final = np.nan
-					break_final = np.nan
-					cut_final = np.nan
-					c1_final = c1_guess
-				if which_fit_guess[0] == 'broken': 
-					gamma1_final = g1_guess
-					gamma2_final = g2_guess
-					alpha_final = alpha_guess
-					break_final = break_low_guess
-					cut_final = np.nan
-					c1_final = c1_guess
-				if which_fit_guess[0] == 'cut': 
-					gamma1_final = g1_guess
-					gamma2_final = g2_guess
-					alpha_final = alpha_guess
-					break_final = break_low_guess
-					cut_final = cut_guess
-					c1_final = c1_guess
-
+				
 			if cut_b>e_min and cut_b< e_max:
 				which_fit_final = 'broken_cut'
 				result_final = result_cut_guess
 				redchi_guess  = result_cut_guess.res_var
 				redchi_final = redchi_guess
-				gamma1_final = g1_guess
-				gamma2_final = g2_guess
-				alpha_final = alpha_guess
-				break_final = break_low_guess
-				cut_final = cut_guess
-				c1_final = c1_guess
 			
 		if use_random :
 			for i in range(iterations):
@@ -838,42 +672,19 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					if which_fit_random[0] == 'single':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'broken':		
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = np.nan
-						c1_final = c1_random
+						
 					if which_fit_random[0] == 'cut':
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = cut_random
-						c1_final = c1_random	
+						
 					if which_fit_random[0] == 'broken_cut':
 						redchi_final = redchi_random
 						which_fit_final = which_fit_random[0]
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = cut_random
-						c1_final = c1_random
-
-
-
+					
 	
 	if which_fit == 'broken':
 		# even if the which_fit is broken we need to check first if the break point is outside of the energy range. In that case we have to change it to single.
@@ -887,23 +698,12 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			result_final = result_single_pl_guess
 			redchi_guess  = result_single_pl_guess.res_var  
 			redchi_final = redchi_guess
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
+			
 		if breakp >= e_min and breakp <=e_max:
 			which_fit_final = 'broken'
 			result_final = result_broken_guess
 			redchi_guess  = result_broken_guess.res_var
 			redchi_final = redchi_guess
-			gamma1_final = g1_guess
-			gamma2_final = g2_guess
-			alpha_final = alpha_guess
-			break_final = break_low_guess
-			cut_final = np.nan
-			c1_final = c1_guess
 		
 		if use_random :
 			for i in range(iterations):
@@ -926,24 +726,14 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 						which_fit_final = 'single'
 						redchi_final = redchi_random
 						result_final = result_single_pl_random
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 				if breakp >= e_min and breakp <=e_max:
 					redchi_random = result_broken_random.res_var
 					if redchi_random < redchi_final:
 						which_fit_final = 'broken'
 						redchi_final = redchi_random
 						result_final =result_broken_random
-						gamma1_final = g1_random
-						gamma2_final = g2_random
-						alpha_final = alpha_random
-						break_final = break_random
-						cut_final = np.nan
-						c1_final = c1_random
+						
 
 	if which_fit == 'cut':
 		# even if the which_fit is broken we need to check first if the break point is outside of the energy range. In that case we have to change it to single.
@@ -957,23 +747,12 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 			result_final = result_single_pl_guess
 			redchi_guess  = result_single_pl_guess.res_var  
 			redchi_final = redchi_guess
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = np.nan
-			c1_final = c1_guess
+			
 		if cut >= e_min and cut <=e_max:
 			which_fit_final = 'cut'
 			result_final = result_cut_guess
 			redchi_guess  = result_cut_guess.res_var
 			redchi_final = redchi_guess
-			gamma1_final = g1_guess
-			gamma2_final = np.nan
-			alpha_final = np.nan
-			break_final = np.nan
-			cut_final = cut_guess
-			c1_final = c1_guess
 		
 		if use_random :
 			for i in range(iterations):
@@ -990,24 +769,13 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 						which_fit_final = 'single'
 						redchi_final = redchi_random
 						result_final = result_single_pl_random
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = np.nan
-						c1_final = c1_random
+						
 				if cut >= e_min and cut <=e_max:
 					redchi_random = result_cut_random.res_var
 					if redchi_random < redchi_final:
 						which_fit_final = 'cut'
 						redchi_final = redchi_random
 						result_final =result_cut_random
-						gamma1_final = g1_random
-						gamma2_final = np.nan
-						alpha_final = np.nan
-						break_final = np.nan
-						cut_final = cut_random
-						c1_final = c1_random
 
 	
 	if which_fit == 'single':
@@ -1016,12 +784,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		result_final = result_single_pl_guess
 		redchi_guess  = result_single_pl_guess.res_var  
 		redchi_final = redchi_guess
-		gamma1_final = g1_guess
-		gamma2_final = np.nan
-		alpha_final = np.nan
-		break_final = np.nan
-		cut_final = np.nan
-		c1_final = c1_guess
+		
 		if use_random:
 			for i in range(iterations):
 				#need [0] because it's an array
@@ -1032,13 +795,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				if redchi_random < redchi_final:
 					redchi_final = redchi_random
 					result_final = result_single_pl_random
-					gamma1_final = g1_random
-					gamma2_final = np.nan
-					alpha_final = np.nan
-					break_final = np.nan
-					cut_final = np.nan
-					c1_final = c1_random
-		
+					
 	
 	result_dataframe = pd.DataFrame({"FInal fit type":which_fit_final}, index = [0])
 	result = result_final
@@ -1216,6 +973,7 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 		result_dataframe["Cutoff err [MeV]"] = cut_err
 		result_dataframe["Alpha"] = alpha
 	
+	#Debugging in case of errors
 	#print(result.beta, 'beta')
 	#print(result.sd_beta, 'sd_beta')
 	#print(result.cov_beta, 'cov_beta')

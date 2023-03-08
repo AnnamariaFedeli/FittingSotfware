@@ -499,11 +499,12 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 	
 	result_final = None
 	
-
+# spec_e, spec_flux, e_err, flux_err, gamma1, gamma2, gamma3, c1, alpha, beta, E_break_low, E_break_high,  E_cut= None, fit = 'best',  maxit=10000, e_min=None, e_max=None):
+	
 	if which_fit == 'best':
 	#first check the redchi and if the break is outside of the energy range using the guess values then compare the random values to these 
 	#if redchi is better, substitute values
-		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, gamma1=g1_guess, gamma2=g2_guess, E_break=break_low_guess, E_cut = cut_guess, fit = 'best', maxit=10000, e_min = e_min, e_max = e_max)
+		which_fit_guess = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_guess, alpha=alpha_guess, beta = beta_guess, gamma1=g1_guess, gamma2=g2_guess, gamma3 = g3_guess, E_break_low=break_low_guess, E_break_high = break_high_guess, E_cut = cut_guess, fit = 'best', maxit=10000, e_min = e_min, e_max = e_max)
 		redchi_guess = which_fit_guess[1]
 		print(redchi_guess)
 		redchi_final = redchi_guess
@@ -515,16 +516,26 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 				#need [0] because it's an array
 				g1_random = np.random.choice(gamma1_array, 1)[0]
 				g2_random = np.random.choice(gamma2_array, 1)[0] 
-				#gamma2 should always be more negative (smaller) than gamma1
+				g3_random = np.random.choice(gamma3_array, 1)[0]
+
+######## SHOULD MAKE SIMILAR STATEMENT FOR GAMMA 3 TO CHECK GAMMAS
+######## OR FIRST RANDOMIZE GAMMA 1 THEN CUT THE ARRAYS OF GAMMA2 AND GAMMA3 SO THAT THE CHOSEN VALUES ARE NEVER SMALLER THAN THE PREVIOUS GAMMA 
+######## OR AS AN ALTERNATIVE IF THE RANDOM VALUE IS BIGGER FOR GAMMA2 THAB GAMMA1 ETC JUST REDO THE RANDOM CHOICE OR EXCHANGE GAMMA VALUES! THIS IS JUST RANDOM VALUES NOT THE 
+######## FINAL VALUES SO IT'S OK TO EXCHANGE THE RANDOM VALUES.
+
+######## BELOW : WHEN CHECKING REDCHIS REMEMBER TO ADD ALL NEW VARIABLES INTO THE FUNCTION AND ALSO MAKE NEW VARIABLES FOR THE RANDOM VALUES OF THE NEW TRIPLE PL FUNCTION
+######## NEW VARIABLES: BETA, GAMMA 3, BREAK LOW AND HIGH ! REMEMBER TO CHANGE THE NAMES OF THE OLD BREAK TO THE NEW ONE
+
+				#gamma2 should always be more negative (smaller) than gamma1	
 				if g1_random < g2_random:
 					gamma = g1_random
 					g1_random = g2_random
 					g2_random = gamma
 				alpha_random = np.random.choice(alpha_array, 1)[0]
-				break_random = np.random.choice(break_array_low,1)[0]
+				break_low_random = np.random.choice(break_array_low,1)[0]
 				cut_random = np.random.choice(cut_array,1)[0]
 				c1_random = np.random.choice(c1_array,1)[0]
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = cut_random, maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, beta = beta_random, gamma1=g1_random, gamma2=g2_random, gamma3 = g3_random, E_break_low=break_low_random, E_break_high = break_high_random, E_cut = cut_random, maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]
@@ -566,10 +577,10 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					g1_random = g2_random
 					g2_random = gamma
 				alpha_random = np.random.choice(alpha_array, 1)[0]
-				break_random = np.random.choice(break_array_low,1)[0]
+				break_low_random = np.random.choice(break_array_low,1)[0]
 				cut_random = np.random.choice(cut_array,1)[0]
 				c1_random = np.random.choice(c1_array,1)[0]
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = cut_random, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_low_random, E_cut = cut_random, fit = 'best_cb', maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]
@@ -607,9 +618,9 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					g1_random = g2_random
 					g2_random = gamma
 				alpha_random = np.random.choice(alpha_array, 1)[0]
-				break_random = np.random.choice(break_array_low,1)[0]
+				break_low_random = np.random.choice(break_array_low,1)[0]
 				c1_random = np.random.choice(c1_array,1)[0]
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = None, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_low_random, E_cut = None, fit = 'best_sb', maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]
@@ -661,11 +672,11 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					g1_random = g2_random
 					g2_random = gamma
 				alpha_random = np.random.choice(alpha_array, 1)[0]
-				break_random = np.random.choice(break_array_low,1)[0]
+				break_low_random = np.random.choice(break_array_low,1)[0]
 				cut_random = np.random.choice(cut_array, 1)[0]
 				c1_random = np.random.choice(c1_array, 1)[0]
 
-				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_random, E_cut = cut_random, fit = 'broken_cut', maxit=10000, e_min = e_min, e_max = e_max)
+				which_fit_random = check_redchi(spec_e, spec_flux, e_err, flux_err, c1=c1_random, alpha=alpha_random, gamma1=g1_random, gamma2=g2_random, E_break=break_low_random, E_cut = cut_random, fit = 'broken_cut', maxit=10000, e_min = e_min, e_max = e_max)
 				redchi_random = which_fit_random[1]
 				if redchi_random < redchi_final:
 					result_final = which_fit_random[2]
@@ -715,9 +726,9 @@ def MAKE_THE_FIT(spec_e, spec_flux, e_err, flux_err, ax, direction='sun', which_
 					g1_random = g2_random
 					g2_random = gamma
 				alpha_random = np.random.choice(alpha_array, 1)[0]
-				break_random = np.random.choice(break_array_low,1)[0]
+				break_low_random = np.random.choice(break_array_low,1)[0]
 				c1_random = np.random.choice(c1_array, 1)[0]
-				result_broken_random = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = g1_random, gamma2 = g2_random, c1 = c1_random, alpha = alpha_random, E_break = break_random, maxit=10000)
+				result_broken_random = pl_fit.broken_pl_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1 = g1_random, gamma2 = g2_random, c1 = c1_random, alpha = alpha_random, E_break = break_low_random, maxit=10000)
 				breakp = result_broken_random.beta[4]
 				if breakp < e_min or breakp > e_max:
 					result_single_pl_random = pl_fit.power_law_fit(x = spec_e, y = spec_flux, xerr = e_err, yerr = flux_err, gamma1=g1_random, c1=c1_random)
